@@ -41,35 +41,35 @@ El resultado es una arquitectura que demuestra cómo diseñar y construir un **p
 
 **FastAPI + Jinja2**
 
-         **↓**
+↓
          
 **Azure Event Hubs**
 
-          **↓**
+↓
            
 **Azure Databricks + Spark Structured Streaming**
 
-           ↓
+↓
            
     **PySpark + SQL**
     
-            ↓
+↓
             
 **Delta Lake / Azure Data Lake Storage Gen2**
 
-            ↓
+↓
             
 **Medallion Architecture — Bronze → Silver → Gold**
 
-            ↓
+↓
             
 **Unity Catalog — Governance & Lineage**
 
-            ↓
+↓
             
 **Star Schema — Fact + Dimensions**
 
-            ↓
+↓
             
 **Analytics / Business Intelligence**
 
