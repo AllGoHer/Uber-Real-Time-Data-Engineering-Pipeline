@@ -39,7 +39,6 @@ El resultado es una arquitectura que demuestra cómo diseñar y construir un **p
 
 ![image](https://github.com/user-attachments/assets/eb783301-c7e0-493a-9f55-1677494909f3)
 
-![image](https://github.com/user-attachments/assets/23736d9b-7067-4eac-8c4d-781a5851991f)
 
 
 ## 🛠️ Stack Tecnológico Detallado
@@ -64,22 +63,46 @@ La arquitectura integra servicios nativos de **Microsoft Azure** y tecnologías 
 ### Flujo tecnológico
 
 **FastAPI + Jinja2**
+
 ↓
+
 **Azure Event Hubs**
+
 ↓
+
 **Azure Databricks + Spark Structured Streaming**
+
 ↓
+
 **PySpark + SQL**
+
 ↓
+
 **Delta Lake / Azure Data Lake Storage Gen2**
+
 ↓
+
 **Medallion Architecture — Bronze → Silver → Gold**
+
 ↓
+
 **Unity Catalog — Governance & Lineage**
+
 ↓
+
 **Star Schema — Fact + Dimensions**
+
 ↓
+
 **Analytics / Business Intelligence**
+
+
+![image](https://github.com/user-attachments/assets/23736d9b-7067-4eac-8c4d-781a5851991f)
+
+
+**Stack principal:**
+`Azure Event Hubs` · `Azure Databricks` · `Apache Spark` · `PySpark` · `Spark Structured Streaming` · `Spark Declarative Pipelines` · `Delta Lake` · `ADLS Gen2` · `Azure Data Factory` · `Unity Catalog` · `SQL` · `FastAPI` · `Git/GitHub`
+
 
 ### Capacidades de Data Engineering demostradas
 
@@ -98,11 +121,63 @@ La arquitectura integra servicios nativos de **Microsoft Azure** y tecnologías 
 * **Cloud Data Engineering en Microsoft Azure**
 * **Version Control & Reproducible Data Pipelines**
 
-**Stack principal:**
-`Azure Event Hubs` · `Azure Databricks` · `Apache Spark` · `PySpark` · `Spark Structured Streaming` · `Spark Declarative Pipelines` · `Delta Lake` · `ADLS Gen2` · `Azure Data Factory` · `Unity Catalog` · `SQL` · `FastAPI` · `Git/GitHub`
+## 📂 Arquitectura Medallion (El Corazón del Pipeline)
+
+####🥉 Bronze Layer (Ingesta Cruda & Append-Only)
+
+**Objetivo:** Ingesta de datos de forma más rápida posible sin transformaciones pesadas.
+
+**Tecnología:** readStream desde Event Hubs.
+
+**Acción:** Convierte el payload binario de Event Hubs a JSON y aplica writeStream en formato Delta con Append Mode.
+
+**Regla:** No se eliminan duplicados aquí. Es la fuente de verdad cruda.
 
 
+#### 🥈 Silver Layer (OBT - One Big Table, Limpieza, Deduplicación & Enrichment)
 
+**Objetivo:** Datos limpios, tipados y listos para análisis. Resolución de calidad de datos.
+
+**Tecnología:** readStream desde Bronze con Change Data Feed (CDF) habilitado.
+
+**Acción:**
+
+- Manejo de eventos tardíos (Watermarks).
+
+- Deduplicación usando dropDuplicates dentro de ventanas de tiempo.
+
+- Enriquecimiento: Join del stream de viajes con tabla estática de perfiles de conductores.
+  
+- Cálculos espaciales (Lat/Lon a Zonas de Uber).
+
+  
+#### 🥇 Gold Layer (Agregaciones de Negocio para BI)
+
+**Objetivo:** Tablas de hechos y dimensiones altamente optimizadas para consumo de dashboards.
+
+**Tecnología:** readStream desde Silver usando Complete Mode o Update Mode para agregaciones.
+
+**Acción:**
+
+- Ventanas Tumble: Viajes completados por zona cada 5 minutos.
+
+- Ventanas Slide: Cálculo de Surge Pricing (precio dinámico) basado en demanda de los últimos 15 minutos.
+
+- Escritura final a Delta Tables gobernadas por Unity Catalog.
+
+## Modelo de Datos (Star Schema)
+
+La capa Gold contiene 1 tabla de hechos + 6 tablas de dimensiones :
+
+| Tipo | Tabla | Descripción |
+|------|-------|-------------|
+| Fact | fact_rides | Datos de hechos de viajes |
+| Dim | dim_booking | Información de reservas |
+| Dim | dim_driver | Dimensión del conductor |
+| Dim	| dim_passenger | Dimensión del pasajero |
+| Dim | dim_payment | Método de pago |
+| Dim | dim_vehicle | Información del vehículo |
+| Dim	| dim_location | Ubicación geográfica |
 
 
 ![image]()
