@@ -12,14 +12,96 @@ Este proyecto fue diseñado, orquestado y desplegado al 100% desde cero. Se impl
 
 
 ## 🎯 Resumen Ejecutivo
-Este proyecto simula y procesa la infraestructura de datos de Uber en tiempo real. Ingesta millones de eventos de telemetría (ubicaciones, solicitudes de viaje, pagos) a través de Azure Event Hubs, los procesa de forma resiliente con Azure Databricks (Spark Streaming), los gobierna con Unity Catalog, y los expone para análisis operativo en tiempo real.
 
-Descripción del Proyecto
-Este es un pipeline de datos en tiempo real de nivel producción que simula el flujo completo de datos de un sistema de reserva de viajes de Uber. Comienza cuando un usuario reserva un viaje a través de una Web App, los datos fluyen en tiempo real hacia Azure Event Hubs, se procesan con Databricks y Spark Declarative Pipelines, y finalmente se modelan en un STAR Schema listo para análisis.
+Este proyecto implementa una **plataforma de datos End-to-End de nivel productivo** que simula la infraestructura de datos de una plataforma de movilidad como Uber, procesando eventos de telemetría y operaciones de viaje en **tiempo real y batch**. El flujo comienza con una Web App donde se generan eventos asociados a solicitudes de viajes, ubicaciones, estados del viaje y pagos, que son ingeridos mediante **Azure Event Hubs** y procesados de forma escalable y resiliente utilizando **Azure Databricks, Apache Spark Structured Streaming y Spark Declarative Pipelines**.
 
-Puntos clave: Arquitectura unificada de procesamiento de streaming en tiempo real + carga de datos históricos por lotes, con diseño de capas Medallion (Bronze → Silver → Gold) .
+La arquitectura incorpora principios modernos de **Data Engineering**, incluyendo procesamiento incremental, arquitectura **Medallion (Bronze, Silver y Gold)**, **Delta Lake**, gestión de metadatos, calidad y trazabilidad de datos, así como **Unity Catalog** para gobierno, seguridad y control de acceso. Finalmente, los datos procesados se transforman en un **modelo dimensional basado en Star Schema**, preparado para alimentar análisis operativo, dashboards y casos de Business Intelligence.
 
-![image]()
+## 🚕 Descripción del Proyecto
+
+El proyecto representa el ciclo completo de datos de un sistema de reserva de viajes, desde la **generación del evento hasta su transformación en información analítica confiable**.
+
+Cuando un usuario solicita un viaje a través de la Web App, se generan eventos que contienen información como solicitudes, ubicaciones GPS, estados del viaje y transacciones. Estos eventos son enviados en tiempo real a **Azure Event Hubs**, que actúa como plataforma de ingesta y distribución de eventos a gran escala.
+
+A continuación, **Azure Databricks** recibe y procesa estos streams mediante **PySpark Structured Streaming**, aplicando transformaciones, validaciones y reglas de calidad. Los datos atraviesan una arquitectura **Medallion**, pasando de una capa **Bronze** con datos crudos, a una capa **Silver** con datos limpios y transformados, y finalmente a una capa **Gold** optimizada para consumo analítico.
+
+El procesamiento se complementa con **Spark Declarative Pipelines**, procesamiento incremental y mecanismos orientados a construir pipelines escalables, resilientes y mantenibles. **Unity Catalog** proporciona la capa de gobierno de datos, permitiendo administrar permisos, trazabilidad, descubrimiento y seguridad sobre los activos de información.
+
+En la etapa final, los datos de negocio se modelan mediante un **Star Schema**, incorporando tablas de hechos y dimensiones para facilitar consultas analíticas y reporting. De esta manera, el proyecto transforma **eventos de movilidad generados en tiempo real en datos confiables, gobernados y preparados para análisis operativo y Business Intelligence**.
+
+### Flujo End-to-End
+
+**Web App → Azure Event Hubs → Azure Databricks → Spark Structured Streaming / Declarative Pipelines → Delta Lake / Medallion Architecture → Unity Catalog → Star Schema → Analytics / BI**
+
+El resultado es una arquitectura que demuestra cómo diseñar y construir un **pipeline moderno de Data Engineering orientado a tiempo real**, integrando ingesta de eventos, procesamiento distribuido, almacenamiento Delta, transformación incremental, gobierno de datos y modelado analítico dentro del ecosistema **Microsoft Azure + Databricks**.
+
+## 🏗️ Arquitectura de Alto Nivel
+
+![image](https://github.com/user-attachments/assets/eb783301-c7e0-493a-9f55-1677494909f3)
+
+
+## 🛠️ Stack Tecnológico Detallado
+
+La arquitectura integra servicios nativos de **Microsoft Azure** y tecnologías de **Apache Spark/Databricks** para construir un pipeline de datos **End-to-End, escalable, resiliente y orientado a procesamiento en tiempo real**, desde la generación de eventos hasta el consumo analítico.
+
+| **Capa / Categoría**                  | **Tecnología**                                           | **Rol en el Proyecto**                                  | **Valor / Justificación Arquitectónica**                                                                                                                                    |
+| ------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Simulación de eventos**             | **FastAPI + Jinja2**                                     | Simulación de la Web App de reservas                    | Genera eventos de negocio representativos de una plataforma de movilidad: solicitudes de viaje, ubicaciones, estados y operaciones.                                         |
+| **Ingesta Streaming**                 | **Azure Event Hubs**                                     | Captura y distribución de eventos en tiempo real        | Servicio de ingesta masiva de eventos compatible con el ecosistema Kafka, diseñado para manejar grandes volúmenes de datos y flujos de alta concurrencia.                   |
+| **Orquestación / Batch**              | **Azure Data Factory (ADF)**                             | Orquestación de cargas, notebooks y procesos batch      | Permite construir pipelines parametrizados para coordinar procesos, cargas históricas, configuraciones y ejecuciones programadas.                                           |
+| **Procesamiento Streaming**           | **Azure Databricks + Apache Spark Structured Streaming** | Procesamiento distribuido de eventos en tiempo real     | Motor de procesamiento escalable para transformar streams, aplicar ventanas temporales, realizar joins y ejecutar lógica de negocio sobre datos en movimiento.              |
+| **Pipelines Declarativos**            | **Spark Declarative Pipelines (SDP/DLT)**                | Construcción y gestión de pipelines de datos            | Simplifica la implementación de transformaciones y dependencias entre datasets, facilitando pipelines mantenibles, escalables y orientados a calidad de datos.              |
+| **Procesamiento / Lógica de Negocio** | **PySpark + SQL**                                        | Transformación, enriquecimiento y validación de datos   | Implementa reglas de negocio, transformaciones distribuidas, cálculos como distancia mediante **Haversine**, clasificación de precios y preparación de datasets analíticos. |
+| **Data Lake**                         | **Azure Data Lake Storage Gen2**                         | Almacenamiento centralizado de datos                    | Proporciona almacenamiento escalable para datos históricos y de streaming dentro de una arquitectura Lakehouse.                                                             |
+| **Formato Transaccional**             | **Delta Lake**                                           | Persistencia de las tablas de datos                     | Aporta transacciones **ACID**, control de versiones mediante **Time Travel**, operaciones **MERGE/UPSERT**, Schema Enforcement y procesamiento incremental.                 |
+| **Arquitectura de Datos**             | **Medallion Architecture**                               | Organización de los datos en **Bronze → Silver → Gold** | Separa datos crudos, datos procesados y datasets preparados para consumo analítico, facilitando calidad, trazabilidad y reutilización.                                      |
+| **Gobierno de Datos**                 | **Unity Catalog**                                        | Seguridad, gobierno y trazabilidad                      | Centraliza el control de acceso, permisos, descubrimiento y **data lineage** sobre los activos de datos a través de las diferentes capas.                                   |
+| **Modelado Dimensional**              | **Star Schema**                                          | Modelo analítico compuesto por **Fact + 6 Dimensions**  | Convierte los datos procesados en un modelo optimizado para consultas analíticas, reporting y Business Intelligence.                                                        |
+| **Control de Versiones**              | **Git + GitHub**                                         | Gestión del código fuente y colaboración                | Permite versionar notebooks, scripts, pipelines y componentes del proyecto, favoreciendo reproducibilidad, trazabilidad y buenas prácticas de desarrollo.                   |
+
+### Flujo tecnológico
+
+**FastAPI + Jinja2**
+↓
+**Azure Event Hubs**
+↓
+**Azure Databricks + Spark Structured Streaming**
+↓
+**PySpark + SQL**
+↓
+**Delta Lake / Azure Data Lake Storage Gen2**
+↓
+**Medallion Architecture — Bronze → Silver → Gold**
+↓
+**Unity Catalog — Governance & Lineage**
+↓
+**Star Schema — Fact + Dimensions**
+↓
+**Analytics / Business Intelligence**
+
+### Capacidades de Data Engineering demostradas
+
+* **Real-Time Data Streaming**
+* **Distributed Data Processing**
+* **Batch & Streaming Integration**
+* **Lakehouse Architecture**
+* **Medallion Architecture**
+* **Delta Lake & ACID Transactions**
+* **Incremental Processing**
+* **Stream-Stream Processing & Windowing**
+* **Data Quality & Validation**
+* **Data Governance & Lineage**
+* **Dimensional Data Modeling**
+* **Metadata / Parameter-Driven Pipelines**
+* **Cloud Data Engineering en Microsoft Azure**
+* **Version Control & Reproducible Data Pipelines**
+
+**Stack principal:**
+`Azure Event Hubs` · `Azure Databricks` · `Apache Spark` · `PySpark` · `Spark Structured Streaming` · `Spark Declarative Pipelines` · `Delta Lake` · `ADLS Gen2` · `Azure Data Factory` · `Unity Catalog` · `SQL` · `FastAPI` · `Git/GitHub`
+
+
+
+
 
 ![image]()
 
