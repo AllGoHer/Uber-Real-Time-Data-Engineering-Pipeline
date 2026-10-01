@@ -35,6 +35,7 @@ En la etapa final, los datos de negocio se modelan mediante un **Star Schema**, 
 
 El resultado es una arquitectura que demuestra cómo diseñar y construir un **pipeline moderno de Data Engineering orientado a tiempo real**, integrando ingesta de eventos, procesamiento distribuido, almacenamiento Delta, transformación incremental, gobierno de datos y modelado analítico dentro del ecosistema **Microsoft Azure + Databricks**.
 
+____________________________________________________________________________________________________________________________________________________________________________________________________________________________
 ## 🏗️ Arquitectura de Alto Nivel
 
 ![image](https://github.com/user-attachments/assets/eb783301-c7e0-493a-9f55-1677494909f3)
@@ -236,10 +237,32 @@ Aquí haremos una reserva de viaje haciendo click en Book a Ride
 - **/book** es el disparador de eventos en tiempo real. Cada vez que un usuario hace clic en "Book a Ride", se genera un objeto de viaje (ride confirmation) y se envía a Azure Event Hubs a través de connection.py.
 
 Este es el punto de entrada del streaming en vivo que alimenta la capa Bronze en Databricks.
-_________________________________________________________________________________________________________
-![image]()
+____________________________________________________________________________________________________________________________
 
-![image]()
+#### 3. connection.py — Productor de Event Hubs
+
+**Propósito:** Gestionar la conexión y el envío de datos hacia Azure Event Hubs (Kafka gestionado).
+
+
+**Funciones principales:**
+
+![image](https://github.com/user-attachments/assets/b2d4e88f-02fd-4016-93b8-24f3e9a4f411)
+
+**Impacto en el pipeline:**
+
+Es el puente entre la Web App y el sistema de mensajería.
+
+Utiliza azure-eventhub SDK para publicar eventos en el topic configurado en .env.
+
+Los datos enviados aquí son inmutables y se convierten en la fuente de verdad cruda para la capa Bronze en Databricks.
+
+#### 4. <mark>data.py</mark> — Generador de Datos Sintéticos
+
+**Propósito:** Generar objetos de viaje realistas que simulan las confirmaciones de reserva de Uber.
+
+Estructura del objeto generado (generate_uber_ride_confirmation()):
+
+![image](https://github.com/user-attachments/assets/fe3b27d6-e591-436b-8ebe-efa5ec4b55dc)
 
 ![image]()
 
