@@ -718,17 +718,29 @@ Y creamos un nuevo recurso y esta vez será un lago de datos.
 
 ![image](https://github.com/user-attachments/assets/73996205-dde7-4ffa-97de-228dc2aa1a35)
 
-![image]()
+Luego damos click en crear.
 
-![image]()
+Ahora veremos creado el lago de datos.
 
-![image]()
+![image](https://github.com/user-attachments/assets/e0338e3f-b27c-4040-8b0e-ad03059b4e94)
 
-![image]()
+Ahora, abriremos Azure Data Factory.
 
-![image]()
+![image](https://github.com/user-attachments/assets/c45932c0-398e-4e1e-a767-e16c53629289)
+<br><br><br><br>
 
-![image]()
+![image](https://github.com/user-attachments/assets/c0c58649-f5c2-44db-9958-1e71aeb5c741)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/75245fb6-a3d0-4348-bf58-c774ae72fa4a)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/9da76009-991e-4660-8df5-832a10c10d5d)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/9f35bf83-e9b8-447f-82c2-bf7033f041a6)
+
+Ahora, en el recuadro de actividades escribimos copiar y arrastramos al panel central.
 
 ![image]()
 
