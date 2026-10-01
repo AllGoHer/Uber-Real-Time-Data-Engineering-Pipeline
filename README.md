@@ -254,11 +254,11 @@ ________________________________________________________________________________
 
 **Impacto en el pipeline:**
 
-Es el puente entre la Web App y el sistema de mensajería.
+- Es el puente entre la Web App y el sistema de mensajería.
 
-Utiliza azure-eventhub SDK para publicar eventos en el topic configurado en .env.
+- Utiliza azure-eventhub SDK para publicar eventos en el topic configurado en .env.
 
-Los datos enviados aquí son inmutables y se convierten en la fuente de verdad cruda para la capa Bronze en Databricks.
+- Los datos enviados aquí son inmutables y se convierten en la fuente de verdad cruda para la capa Bronze en Databricks.
 
 _______________________________________________________________________________________________________________________________________________________________________
 #### 4. <mark>data.py</mark> — Generador de Datos Sintéticos
@@ -270,11 +270,11 @@ Estructura del objeto generado (<mark>generate_uber_ride_confirmation()</mark>):
 ![image](https://github.com/user-attachments/assets/fe3b27d6-e591-436b-8ebe-efa5ec4b55dc)
 
 
-Impacto en el pipeline:
+**Impacto en el pipeline:**
 
-Los IDs de claves foráneas (ej. vehicle_type_id, payment_method_id) coinciden con los mapeos en Data/, lo que permite joins eficientes en la capa Silver.
+- Los IDs de claves foráneas (ej. vehicle_type_id, payment_method_id) coinciden con los mapeos en Data/, lo que permite joins eficientes en la capa Silver.
 
-El esquema generado está diseñado para modelado dimensional desde el origen, facilitando la construcción del Star Schema en la capa Gold.
+- El esquema generado está diseñado para modelado dimensional desde el origen, facilitando la construcción del Star Schema en la capa Gold.
 
 ________________________________________________________________________________________________________________________________________________________________________________
 #### 5. <mark>files_array.json</mark> — Configuración de Ingesta Batch
@@ -294,7 +294,7 @@ json:
       ]
 
 
-Impacto en el pipeline:
+**Impacto en el pipeline:**
 
 - Este archivo se sube a ADLS Gen2 y se lee mediante una actividad Lookup en ADF.
 
