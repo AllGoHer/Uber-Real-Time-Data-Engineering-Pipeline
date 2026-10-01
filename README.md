@@ -742,27 +742,48 @@ Ahora, abriremos Azure Data Factory.
 
 Ahora, en el recuadro de actividades escribimos copiar y arrastramos al panel central.
 
-![image]()
+![image](https://github.com/user-attachments/assets/3a67b100-30b4-460e-a182-03fe0589bba6)
+<br><br><br><br>
 
-![image]()
+![image](https://github.com/user-attachments/assets/e86f4d48-f4bd-408e-aaed-8446837a0759)
 
-![image]()
+* Ahora, crearemos la conexión de GitHub con ADF
+  
+![image](https://github.com/user-attachments/assets/289e31ce-4587-4810-8c66-f7bc56a2aa1a)
 
-![image]()
+Se puede hacer la conexión directa con github, pero como nuestro consumidor es un HTTP lo haremos a través de ella.
 
-![image]()
+![image](https://github.com/user-attachments/assets/01afcb02-6552-426a-8321-e4cc84cfe5fa)
 
-![image]()
+Luego, completaremos los datos solicitados
 
-![image]()
+![image](https://github.com/user-attachments/assets/5b555db9-9d52-41f8-8db8-57fa3c5ffeea)
 
-![image]()
+NOTA: Estos son los pasos para conseguir la URL Base.
 
-![image]()
+1.	Vamos al github que clonamos y, entramos al archivo Data y seleccionamos uno de los archivos map.
 
-![image]()
 
-![image]()
+![image](https://github.com/user-attachments/assets/0bbdc88b-39cf-4db6-b43f-4b681c9c7133)
+
+2.	Luego, hacemos click en Raw.
+   
+![image](https://github.com/user-attachments/assets/d357e2d0-f332-4ca8-9875-53f70b33250b)
+
+3.	Y copiamos la siguiente sección del URL para pegarlo en la URL Base.
+   
+![image](https://github.com/user-attachments/assets/adbd7ce4-d0ea-488a-b73e-e06cf0fd2822)
+
+Luego de llenar los datos solicitados obtendremos lo siguiente.
+
+![image](https://github.com/user-attachments/assets/c6c86579-4986-49e2-8959-b88067448f11)
+
+Ahora, crearemos una conexión para el servicio con mis lagos de datos.
+
+![image](https://github.com/user-attachments/assets/f91699e1-066f-4c9e-8a94-28f5368eb4cd)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/de66ee48-f2b2-4b6d-929e-fed3ff9d5a88)
 
 ![image]()
 
