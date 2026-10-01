@@ -700,15 +700,23 @@ Nos vamos al portal azure e ingresamos a gestión de recursos/grupos de recursos
 
 ![image](https://github.com/user-attachments/assets/78dd8e97-4209-4e76-9f0a-9310eaf30bb5)
 
-![image]()
+Luego regresamos a grupos de recursos/RG-UberProject.
 
-![image]()
+![image](https://github.com/user-attachments/assets/0a8a6306-638e-44bd-99a2-39c01470aa1b)
 
-![image]()
 
-![image]()
+Y creamos un nuevo recurso y esta vez será un lago de datos.
 
-![image]()
+![image](https://github.com/user-attachments/assets/dc21ae47-f0a8-4d65-aadd-357a0dd62590)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/f876a831-7de0-4c04-af56-757dc9005a23)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/66e658c8-8217-4722-970d-c84b37df1b54)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/73996205-dde7-4ffa-97de-228dc2aa1a35)
 
 ![image]()
 
