@@ -419,8 +419,10 @@ En este capitulo, veremos el desarrollo del proyecto Uber Real-Time paso a paso 
 <br><br>
 
 ![image](https://github.com/user-attachments/assets/f128dc96-9f83-4314-9225-a37f7f5f7b6f)
+<br><br>
 
 ![image](https://github.com/user-attachments/assets/ac48ba47-b277-44d8-a358-97ab4eb5c36b)
+<br><br>
 
 3.	Ahora, vamos a crear un Even Hubs y, procederemos a escribir even hubs en el buscador y seleccionamos.
    
@@ -429,40 +431,52 @@ En este capitulo, veremos el desarrollo del proyecto Uber Real-Time paso a paso 
 Luego, hacemos click en crear y le asignamos un nombre.
 
 ![image](https://github.com/user-attachments/assets/f53d521c-e609-4440-80ba-4943dc638061)
+<br><br>
 
 ![image](https://github.com/user-attachments/assets/c5e86fcc-a7a4-4d7c-a0ec-ae3241ac1c7b)
+<br><br>
 
 ![image](https://github.com/user-attachments/assets/9c8433a7-d682-49da-acbb-948460fa0676)
 
 Ahora, volvemos a grupo de recursos para verificar dentro de ella este EventosUber.
 
 ![image](https://github.com/user-attachments/assets/1324b4f8-ea79-414b-a0bd-a8b7e491750f)
+<br><br>
 
 ![image](https://github.com/user-attachments/assets/fb7425b8-431d-4ce3-b2aa-865ef67d04a8)
+<br><br>
 
 ![image](https://github.com/user-attachments/assets/d05991b8-fcaf-4b3d-9c10-e35b8881b9f0)
+<br><br>
 
 ![image](https://github.com/user-attachments/assets/b4f2fed3-1021-436a-9ad7-d7f4c74ad208)
 
 Creamos un topic.
 
 ![image](https://github.com/user-attachments/assets/9bd6e4b6-f046-4990-8cb8-60ed6db09408)
+<br><br>
 
 ![image](https://github.com/user-attachments/assets/ca340f91-8f8c-4f22-b6af-99fddf93fcc5)
+<br><br>
 
 ![image](https://github.com/user-attachments/assets/6f1c2054-2730-40c2-8a49-96c3545456fb)
+<br><br>
 
 ![image](https://github.com/user-attachments/assets/cb734cc3-b578-4e29-b173-20d57964c6d3)
+<br><br>
 
 ![image](https://github.com/user-attachments/assets/bb24a113-a203-4bb1-a81c-3d02a157cd7e)
+<br><br>
 
 ![image](https://github.com/user-attachments/assets/9cb312bf-3465-4d09-8932-4be29b04b60b)
 
 Ahora, veremos las directivas del acceso compartido para los envíos. Así es que, nos dirigimos a configuración>directivas de acceso compartido y damos click en +agregar.
 
 ![image](https://github.com/user-attachments/assets/17cad7c0-9325-4307-8c11-bf6494d42d2b)
+<br><br>
 
 ![image](https://github.com/user-attachments/assets/44aa2807-bf18-4f43-9980-dfe4bf487925)
+<br><br>
 
 ![image](https://github.com/user-attachments/assets/3b7b641d-5977-4fcd-88a2-2ded1bb1dc21)
 
@@ -474,10 +488,13 @@ Ahora, veremos los prerrequisitos para trabajar con el Centro de Eventos (Even H
 
 
 ![image](https://github.com/user-attachments/assets/7e4050ac-a422-4bdd-b1d7-1a159f13b51c)
+<br><br>
 
 ![image](https://github.com/user-attachments/assets/e0f70c25-75d1-4612-92f7-b3216e86d78b)
+<br><br>
 
 ![image](https://github.com/user-attachments/assets/e0c7f477-f1b3-438e-bf53-ca0856775e13)
+<br><br>
 
 ![image](https://github.com/user-attachments/assets/ba39ca11-e582-4e38-a135-0a2d312b35d0)
 
@@ -524,6 +541,7 @@ Código:
 
 
 ![image](https://github.com/user-attachments/assets/43d0e973-94ae-41fb-abe2-5242a8c0dbc3)
+<br><br>
 
 ![image](https://github.com/user-attachments/assets/66f147bb-0929-456e-9651-6e28305de9e7)
 
@@ -586,41 +604,99 @@ Código:
         .venv/Scripts/activate
 
 
-![image]()
+![image](https://github.com/user-attachments/assets/fdd164ac-7f14-4df9-a00f-25fa9fcb7659)
 
-![image]()
+Luego, instalamos los requerimientos.
 
-![image]()
+Código:
 
-![image]()
+        pip install -r requirements.txt 
 
-![image]()
 
-![image]()
+![image](https://github.com/user-attachments/assets/27ab934c-7ca9-4ace-8f37-2decf483dd6b)
 
-![image]()
+Bien, ahora nos vamos Azure a enviar directivas (SendPolicy) y copiamos la clave de la cadena de conexión primaria.
 
-![image]()
+![image](https://github.com/user-attachments/assets/0fde47a1-dcfe-4b3a-8d1a-cb42393f40fd)
 
-![image]()
+Luego, regresas a VSCode y creamos el archivo .env y dentro de ella pegamos el código copiado de la siguiente manera.
 
-![image]()
+1.	Creamos el archivo .env
 
-![image]()
+2.	Escribimos el siguiente código antes de pegar la cadena de conexión principal copiada.
 
-![image]()
+Código:
 
-![image]()
+        CONNECTION_STRING = “            “   
 
-![image]()
+3.	Dentro de las comillas pegamos la cadena de conexión principal copiada.
 
-![image]()
 
-![image]()
+![image](https://github.com/user-attachments/assets/ca7aabde-ad8b-4a27-aca8-423485fa1ae5)
 
-![image]()
+4.	Ahora complementamos el código de .env
 
-![image]()
+Código:
+
+		EVENT_HUBNAME = "ubertopic"
+		EVENT_HUB_NAMESPACE = "eventosuber"
+
+
+![image](https://github.com/user-attachments/assets/4fe12c99-1718-4ab6-9f59-2d77ea0d371a)
+
+5.	Y finalmente guardamos el archivo.
+
+Ahora, nos vamos al archivo conection.py y lo ejecutamos.
+
+
+![image](https://github.com/user-attachments/assets/474e5a22-9937-44a8-b6ab-e8bea1f8c534)
+
+Luego, nos vamos a Data Explorer para ver los eventos.
+
+![image](https://github.com/user-attachments/assets/b7078473-0dad-4f05-ad69-c266cb99a2eb)
+
+Luego, pasamos a la api.py y pediremos que se recargue en el localhost
+
+Código:
+
+        uvicorn api:app --reload
+
+
+![image](https://github.com/user-attachments/assets/d6ba8764-9d67-4a5c-a838-9ddedfad38ab)
+<br><br>
+
+![image](https://github.com/user-attachments/assets/58e22d93-e737-414f-a011-45011a6d9e90)
+
+Aquí haremos una reserva de viaje haciendo click en Book a Ride
+
+![image](https://github.com/user-attachments/assets/03d68efc-92bb-4c77-b1b6-630578336d0f)
+
+Ahora, en Azure veremos en el ubertopic otro evento.
+
+![image](https://github.com/user-attachments/assets/7203a913-e6a2-40d1-b25d-798353c7d1d9)
+
+**AZURE DATA FACTORY**
+
+![image](https://github.com/user-attachments/assets/46ef86bd-7bed-4520-b1d7-24f276903c89)
+
+Nos vamos al portal azure e ingresamos a gestión de recursos/grupos de recursos/RG-UberProject y hacemos click en crear.
+
+![image](https://github.com/user-attachments/assets/9ada65bc-a079-443b-84bf-f158055777e0)
+<br><br>
+
+![image](https://github.com/user-attachments/assets/e7e09675-bef5-4486-b8a4-3e257957adf6)
+<br><br>
+
+![image](https://github.com/user-attachments/assets/7b47e487-9f84-49cd-93ae-29e47c77c954)
+<br><br>
+
+![image](https://github.com/user-attachments/assets/64a568be-ae33-4a37-88f3-d3cfb2c77617)
+<br><br>
+
+![image](https://github.com/user-attachments/assets/019655bb-0422-47ce-b240-bd8f1eb45aed)
+<br><br>
+
+![image](https://github.com/user-attachments/assets/78dd8e97-4209-4e76-9f0a-9310eaf30bb5)
 
 ![image]()
 
