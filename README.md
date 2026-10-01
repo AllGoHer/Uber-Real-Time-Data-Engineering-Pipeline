@@ -797,68 +797,139 @@ Regresamos al Autor y entraremos a Datasets
 <br><br><br><br>
 
 ![image](https://github.com/user-attachments/assets/c847d5a9-5b2a-44cd-8985-fdd48242381b)
+<br><br><br><br>
 
 ![image](https://github.com/user-attachments/assets/6ea6b8e2-540a-4fe2-a209-d63b842e11f7)
+<br><br><br><br>
 
-![image]()
+![image](https://github.com/user-attachments/assets/37062d2e-0e57-4b8a-80ba-0f72b94ee710)
 
-![image]()
+Completamos la solicitud de los datos
 
-![image]()
+![image](https://github.com/user-attachments/assets/5bbee367-0ac8-4d9b-a804-f64fcb4ecb30)
 
-![image]()
+En la parte de Dirección de URL relativa es la parte complementaria de la URL Base anterior.
 
-![image]()
+![image](https://github.com/user-attachments/assets/11c10b3d-6e5f-4b14-9c8d-5e5bba2879d1)
+<br><br><br><br>
 
-![image]()
+![image](https://github.com/user-attachments/assets/61012a37-4051-486e-bc8b-d4f5b2b988b7)
 
-![image]()
+Como han visto, hemos vinculado un set de datos pero el git hub tiene más el cual necesitaremos, pero también sabemos que todas las las url son casi las mismas y solo cambia el final. Entonces, para ello crearemos los parámetros 
 
-![image]()
+![image](https://github.com/user-attachments/assets/de8e89e7-8004-4c20-8404-5038faa0ba3a)
+<br><br><br><br>
 
-![image]()
+![image](https://github.com/user-attachments/assets/0a890ffa-2b36-446c-8d8b-c1487a1cb059)
+<br><br><br><br>
 
-![image]()
+![image](https://github.com/user-attachments/assets/622d1923-274a-4889-b847-0e05db6005fa)
 
-![image]()
+Regresamos a conexión y hacemos click en el recuadro dirección URL relativo y luego, hacemos click en la parte inferior en las letras azules que indican agregar contenido dinámico. 
 
-![image]()
+![image](https://github.com/user-attachments/assets/c940a96a-3b4b-4477-9878-7a70edba12a0)
+<br><br><br><br>
 
-![image]()
+![image](https://github.com/user-attachments/assets/19dc40a0-a5f0-4b87-950e-66338758fa30)
 
-![image]()
+Dentro del primer recuadro colocamos la url complementaria como en el paso anterior.
 
-![image]()
+![image](https://github.com/user-attachments/assets/d21f123f-66c4-4610-9e10-550a7f6c70e2)
 
-![image]()
+Debe quedar hasta data, así. 
 
-![image]()
+![image](https://github.com/user-attachments/assets/b6303d5b-e9eb-41ba-a58e-e6653f35ffc5)
 
-![image]()
+Luego, agregaremos el parámetro p_file haciendo click en ella.
 
-![image]()
+![image](https://github.com/user-attachments/assets/07c2b6fd-0602-4930-8b7b-78ef126d6bd4)
 
-![image]()
+Luego, borramos el arroba que iba adelante y, agregamos un arroba después de Data/ y, encerramos entre llaves el dataset. Debe quedar de la siguiente manera.
 
-![image]()
+![image](https://github.com/user-attachments/assets/fdfdbe43-cb69-43c5-93fa-7cc8d406af8e)
 
-![image]()
+NOTA: Extiende el recuadro del generador de expresiones de canalización y verifica que no haya ningún espacio entre el @rroba y las llaves del dataset() para no tener problemas futuros en la depuración de la canalización. 
 
-![image]()
+Y finalmente, damos aceptar.
 
-![image]()
 
-![image]()
+Escribimos el siguiente código.
 
-![image]()
+Código:
 
-![image]()
+		[
+		{"file":"map_cities"},
+		{"file":"map_cancellation_reasons"},
+		{"file":"bulk_rides"},
+		{"file":"map_payment_methods"},
+		{"file":"map_ride_statuses"},
+		{"file":"map_vehicle_makes"},
+		{"file":"map_vehicle_types"}
+		]
 
-![image]()
+Y ahora volvemos a la canalización HTTPToADLS y nos ubicamos en parámetros y crea uno nuevo. En él, asignamos un nombre (file_array) de tipo Matriz y en valor predeterminado pegamos los datos copiados.
 
-![image]()
+![image](https://github.com/user-attachments/assets/9e59ca57-3194-468c-8942-a624aac90a8c)
 
-![image]()
+Regresamos a HTTPToADLS y en actividades escribimos búsqueda y lo arrastramos al lienzo.
+
+![image](https://github.com/user-attachments/assets/db160a75-56d9-4eed-9686-999f797db34d)
+
+Ahora, en generales en la sección de nombre escribimos files_array o ds_files_array
+
+![image](https://github.com/user-attachments/assets/b123f09a-8bc6-4772-8ad5-d646d937bfc6)
+
+Luego, vamos a configuraciones y desmarcamos el check que está en solo la primera fila. 
+
+![image](https://github.com/user-attachments/assets/3fba34c7-70b0-4fe6-85cc-fbc73a570272)
+
+Debe quedar así.
+
+![image](https://github.com/user-attachments/assets/5f03ec4d-69b8-492f-9852-5d041c17260c)
+
+Luego, vamos al portal de Azure y hacemos los siguientes pasos:
+
+1.	Ir a dlproyectouberdev/ almacenamiento de datos / contenedores.
+
+![image](https://github.com/user-attachments/assets/faaa6cd7-edc7-4b31-9059-a8bdc20be5fa)
+
+2.	Agregamos un nuevo contenedor.
+   
+![image](https://github.com/user-attachments/assets/75336dbc-2b1a-4930-806f-a81738e6ef3e)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/5d4e4940-f6a1-45e6-8ea0-f7ad27a4bd82)
+
+3.	Ingresamos al archivo raw y cargamos el archivo files_array.json (tenerlo previamente descargado del github).
+   
+![image](https://github.com/user-attachments/assets/bcd609ae-b082-4914-9afe-d9b1408c8666)
+
+4.	Regresamos a ADF-ProyectoUber-dev, hacemos click en búsqueda e ingresamos a configuración y hacemos click en nuevo.
+   
+![image](https://github.com/user-attachments/assets/4f82c843-29fa-437d-8cf1-2da123c96edc)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/96b94a51-52bb-4d36-ab13-410c4401655a)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/9a0d87e4-2bae-4b02-9596-595774117188)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/4a4de4da-2b78-432a-8121-3a2fac8ab0bd)
+
+5.	Hacemos click en la carpeta y seleccionamos raw luego, files array.json y damos click en aceptar.
+   
+![image](https://github.com/user-attachments/assets/ae15cb58-b9c8-4fee-a5bc-fe32d34be77e)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/025d7789-9dcd-44c8-86a3-91a3d1f8d87a)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/b5e60b41-2c81-4c24-b515-2b3101588c5c)
+
+![image](https://github.com/user-attachments/assets/67ce2b28-ea20-4a90-a357-e0a30f726add)
+
+* Ahora, en el lienzo seleccionamos copiar datos y en generales desactivamos el estado de la actividad.
 
 ![image]()
 
