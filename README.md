@@ -334,20 +334,93 @@ ________________________________________________________________________________
 
 - <mark>pyproject.toml</mark> usa el build backend <mark>uv_build</mark>, lo que indica modernidad en el toolchain y conocimiento de prácticas actuales de Python.
 
+___________________________________________________________________________________________________________________________________________________________________________________________________________________________
+## 🚀 Inicio Rápido
 
-![image]()
+**1. Preparación del entorno**
 
-![image]()
+bash:
 
-![image]()
+        # Instalar uv (recomendado)
+        pip install uv
+        
+        # Clonar el proyecto
+        git clone https://github.com/anshlambagit/Uber_Data_Engineer_Project.git
+        cd Uber_Data_Engineer_Project
+        
+        # Instalar dependencias
+        uv sync
+        # o usando pip
+        pip install -r requirements.txt
 
-![image]()
+________________________________________________________________________________________________________________________________________
+**2. Configurar Event Hub**
 
-![image]()
+Crea un archivo .env en la raíz del proyecto:
 
-![image]()
+env:
 
-![image]()
+      CONNECTION_STRING="Endpoint=sb://<tu-namespace>.servicebus.windows.net/;SharedAccessKeyName=<nombre-policy>;SharedAccessKey=<tu-clave>"
+      EVENT_HUBNAME="ubertopic"
+      EVENT_HUB_NAMESPACE="<tu-namespace>"
+
+____________________________________________________________________________________________________________________________________________
+**3. Iniciar la Web App**
+
+bash:
+
+      python api.py
+
+
+Accede a http://localhost:8000 y haz clic en "Book a Ride" para disparar el flujo de datos hacia Event Hub.
+
+_______________________________________________________________________________________________________________________________________________
+**4. Verificar el envío de datos**
+
+
+bash:
+
+      python connection.py
+
+      
+Si en la terminal aparece Successfully sent to Event Hub, el envío fue exitoso.
+
+
+**Puntos Clave de Configuración de ADF**
+
+- Linked Service (GitHub): URL Base = https://raw.githubusercontent.com/
+
+- Dataset: Usar el parámetro p_file para construir la URL dinámica: .../Data/@{dataset().p_file}
+
+- Iteración ForEach: Expresión @activity('ds_files_array').output.value para recorrer la lista de archivos
+
+- Copy Activity origen: Valor del parámetro @{item().file}.json (atención al sufijo .json)
+
+___________________________________________________________________________________________________________________________________________________________________________________________________________________________
+## 🧠 DESARROLLO DEL PROYECTO PASO A PASO Y PRUEBA VISUAL (VISUAL PROOF) 📸 DE PRINCIPIO A FIN
+___________________________________________________________________________________________________________________________________________________________________________________________________________________________
+
+1.	Entramos a Portal.azure.com y, luego en el buscador de azure escribimos SOURCE MANAGER y hacemos click en grupo de recursos.
+
+2.	Creamos un recurso nuevo, le asignamos un nombre y damos click en revisar y crear.
+
+![image](https://github.com/user-attachments/assets/a7ed7744-4ea6-4401-a36d-da544bcde9e6)
+
+![image](https://github.com/user-attachments/assets/017cded8-6f74-4030-b971-5521eab18d98)
+
+![image](https://github.com/user-attachments/assets/bdea2436-aa15-4d17-979c-31acf5db9db9)
+
+![image](https://github.com/user-attachments/assets/f128dc96-9f83-4314-9225-a37f7f5f7b6f)
+
+![image](https://github.com/user-attachments/assets/ac48ba47-b277-44d8-a358-97ab4eb5c36b)
+
+3.	Ahora, vamos a crear un Even Hubs y, procederemos a escribir even hubs en el buscador y seleccionamos.
+   
+![image](https://github.com/user-attachments/assets/59b21182-b795-4b07-ad4d-eb4df19bb4ef)
+
+Luego, hacemos click en crear y le asignamos un nombre.
+
+![image](https://github.com/user-attachments/assets/f53d521c-e609-4440-80ba-4943dc638061)
 
 ![image]()
 
