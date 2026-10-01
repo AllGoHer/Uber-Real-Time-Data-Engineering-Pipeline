@@ -397,8 +397,10 @@ Si en la terminal aparece Successfully sent to Event Hub, el envío fue exitoso.
 - Copy Activity origen: Valor del parámetro @{item().file}.json (atención al sufijo .json)
 
 ___________________________________________________________________________________________________________________________________________________________________________________________________________________________
-## 🧠 DESARROLLO DEL PROYECTO PASO A PASO Y PRUEBA VISUAL (VISUAL PROOF) 📸 DE PRINCIPIO A FIN
+## 🧠 DESARROLLO DEL PROYECTO Y PRUEBA VISUAL (VISUAL PROOF) 📸 
 ___________________________________________________________________________________________________________________________________________________________________________________________________________________________
+En este capitulo, veremos el desarrollo del proyecto Uber Real-Time paso a paso con evidencias visuales de principio a fin.
+
 
 1.	Entramos a Portal.azure.com y, luego en el buscador de azure escribimos SOURCE MANAGER y hacemos click en grupo de recursos.
 
@@ -422,61 +424,161 @@ Luego, hacemos click en crear y le asignamos un nombre.
 
 ![image](https://github.com/user-attachments/assets/f53d521c-e609-4440-80ba-4943dc638061)
 
-![image]()
+![image](https://github.com/user-attachments/assets/c5e86fcc-a7a4-4d7c-a0ec-ae3241ac1c7b)
 
-![image]()
+![image](https://github.com/user-attachments/assets/9c8433a7-d682-49da-acbb-948460fa0676)
 
-![image]()
+Ahora, volvemos a grupo de recursos para verificar dentro de ella este EventosUber.
 
-![image]()
+![image](https://github.com/user-attachments/assets/1324b4f8-ea79-414b-a0bd-a8b7e491750f)
 
-![image]()
+![image](https://github.com/user-attachments/assets/fb7425b8-431d-4ce3-b2aa-865ef67d04a8)
 
-![image]()
+![image](https://github.com/user-attachments/assets/d05991b8-fcaf-4b3d-9c10-e35b8881b9f0)
 
-![image]()
+![image](https://github.com/user-attachments/assets/b4f2fed3-1021-436a-9ad7-d7f4c74ad208)
 
-![image]()
+Creamos un topic.
 
-![image]()
+![image](https://github.com/user-attachments/assets/9bd6e4b6-f046-4990-8cb8-60ed6db09408)
 
-![image]()
+![image](https://github.com/user-attachments/assets/ca340f91-8f8c-4f22-b6af-99fddf93fcc5)
 
-![image]()
+![image](https://github.com/user-attachments/assets/6f1c2054-2730-40c2-8a49-96c3545456fb)
 
-![image]()
+![image](https://github.com/user-attachments/assets/cb734cc3-b578-4e29-b173-20d57964c6d3)
 
-![image]()
+![image](https://github.com/user-attachments/assets/bb24a113-a203-4bb1-a81c-3d02a157cd7e)
 
-![image]()
+![image](https://github.com/user-attachments/assets/9cb312bf-3465-4d09-8932-4be29b04b60b)
 
-![image]()
+Ahora, veremos las directivas del acceso compartido para los envíos. Así es que, nos dirigimos a configuración>directivas de acceso compartido y damos click en +agregar.
 
-![image]()
+![image](https://github.com/user-attachments/assets/17cad7c0-9325-4307-8c11-bf6494d42d2b)
 
-![image]()
+![image](https://github.com/user-attachments/assets/44aa2807-bf18-4f43-9980-dfe4bf487925)
 
-![image]()
+![image](https://github.com/user-attachments/assets/3b7b641d-5977-4fcd-88a2-2ded1bb1dc21)
 
-![image]()
+Ahora crearemos una política de escucha, lo haremos de la misma manera del paso anterior y solo pondremos el nombre ListenPolicy y seleccionamos escuchar.
 
-![image]()
+![image](https://github.com/user-attachments/assets/a90e19d3-5f7c-4b36-a1be-9f8530b9dfd3)
 
-![image]()
+Ahora, veremos los prerrequisitos para trabajar con el Centro de Eventos (Even Hub). Para ello, vamos al siguiente vinculo: https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-python-get-started-send?tabs=passwordless%2Croles-azure-portal
 
-![image]()
 
-![image]()
+![image](https://github.com/user-attachments/assets/7e4050ac-a422-4bdd-b1d7-1a159f13b51c)
 
-![image]()
+![image](https://github.com/user-attachments/assets/e0f70c25-75d1-4612-92f7-b3216e86d78b)
 
-![image]()
+![image](https://github.com/user-attachments/assets/e0c7f477-f1b3-438e-bf53-ca0856775e13)
 
-![image]()
+![image](https://github.com/user-attachments/assets/ba39ca11-e582-4e38-a135-0a2d312b35d0)
 
-![image]()
+Código:
+        import asyncio
+        
+        from azure.eventhub import EventData
+        from azure.eventhub.aio import EventHubProducerClient
+        from azure.identity.aio import DefaultAzureCredential
+        
+        EVENT_HUB_FULLY_QUALIFIED_NAMESPACE = "EVENT_HUB_FULLY_QUALIFIED_NAMESPACE"
+        EVENT_HUB_NAME = "EVENT_HUB_NAME"
+        
+        credential = DefaultAzureCredential()
+        
+        async def run():
+            # Create a producer client to send messages to the event hub.
+            # Specify a credential that has correct role assigned to access
+            # event hubs namespace and the event hub name.
+            producer = EventHubProducerClient(
+                fully_qualified_namespace=EVENT_HUB_FULLY_QUALIFIED_NAMESPACE,
+                eventhub_name=EVENT_HUB_NAME,
+                credential=credential,
+            )
+            print("Producer client created successfully.") 
+            async with producer:
+                # Create a batch.
+                event_data_batch = await producer.create_batch()
+        
+                # Add events to the batch.
+                event_data_batch.add(EventData("First event "))
+                event_data_batch.add(EventData("Second event"))
+                event_data_batch.add(EventData("Third event"))
+        
+                # Send the batch of events to the event hub.
+                await producer.send_batch(event_data_batch)
+        
+                # Close credential when no longer needed.
+                await credential.close()
+        
+        asyncio.run(run())
 
-![image]()
+1.	Primero creamos una carpeta del proyecto y lo vinculamos a VSCode.
+
+
+![image](https://github.com/user-attachments/assets/43d0e973-94ae-41fb-abe2-5242a8c0dbc3)
+
+![image](https://github.com/user-attachments/assets/66f147bb-0929-456e-9651-6e28305de9e7)
+
+NOTA: Debemos tener pre instalado Git.
+
+Ahora, instalamos uv para python.
+
+Código:
+
+        pip install uv
+        
+        ó
+        
+        python -m pip install uv
+
+
+![image](https://github.com/user-attachments/assets/2457af2d-ad1a-4af1-913c-b4e4cd727fd3)
+
+Código:
+
+        uv init
+
+y veras la creación de nuevos archivos en tu proyecto.
+
+
+![image](https://github.com/user-attachments/assets/e2caaed0-cf07-4aa5-b777-6066afb301fa)
+
+Luego, clone mi repositorio para cargar la carpeta con los datos.
+
+Código:
+	
+        git clone https://github.com/AllGoHer/Uber_Data_Engineer_Project.git
+
+
+![image](https://github.com/user-attachments/assets/86706baf-fa3b-47c4-88e5-65ad8dfd56b4)
+
+Ahora, abrimos esa subcarpeta en VSCode.
+
+![image](https://github.com/user-attachments/assets/b7666fea-8394-435e-86c0-ad6290132696)
+
+NOTA: verificar que el archivo files_array.json quede de la siguiente manera.
+
+![image](https://github.com/user-attachments/assets/087ea2aa-ca18-4ce6-a27d-f731cf568015)
+
+Al igual, que el archivo clonado.
+
+![image](https://github.com/user-attachments/assets/07b3f3be-cf84-418e-95e8-56c24b27397d)
+
+Y finalmente guardamos los cambios.
+
+En esta instancia, crearemos un entorno virtual y lo activamos.
+
+Código:
+
+        python -m venv .venv
+
+
+Código:
+
+        .venv/Scripts/activate
+
 
 ![image]()
 
