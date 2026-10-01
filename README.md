@@ -39,7 +39,64 @@ ________________________________________________________________________________
 
 ## 🏗️ Arquitectura de Alto Nivel
 
-![image](https://github.com/user-attachments/assets/eb783301-c7e0-493a-9f55-1677494909f3)
+![image](https://github.com/user-attachments/assets/8fe9eddc-a6dd-42f4-88b8-8b291e61d360)
+
+                                     ┌─────────────────────────────────────────────────────────────────────────────┐
+                                     │                         FLUJO DE DATOS END-TO-END                           │
+                                     └─────────────────────────────────────────────────────────────────────────────┘
+
+                            [Web App: api.py]
+                                  │
+                                  │ POST /book → generate_uber_ride_confirmation() [data.py]
+                                  ▼
+                   [connection.py: send_to_event_hub()]
+                                  │
+                                  │ JSON serializado → EventData
+                                  ▼
+                        ┌───────────────────┐
+                        │  Azure Event Hubs │  ← Topic: "ubertopic"
+                        │ (Kafka gestionado)│
+                        └─────────┬─────────┘
+                                  │
+                                  │ readStream (Spark Structured Streaming)
+                                  ▼
+┌─────────────────────────────────────────────────────────────────────────────┐         ┌─────────────────────────────────────────────────────────────────────────────┐
+|           DATABRICKS — BRONZE LAYER                                         |         │                         FLUJO BATCH (ADF)                                   │
+│  • Ingesta cruda, Append-Only, sin transformaciones                         │         │  GitHub (Data/*.json) → ADF Lookup (files_array.json) → ForEach → Copy      │
+│  • Delta Table: eventos JSON tal como llegan                                │         │  → ADLS Gen2 (Bronze) → Databricks (Silver)                                 │
+└─────────────────────────────────────────────────────────────────────────────┘         └───────────────────────────────┬─────────────────────────────────────────────┘
+                                │                                                                                       │
+                                │                                                                                       │
+                                │ readStream → transformaciones                                                         │
+                                ▼                                                                                       │
+┌─────────────────────────────────────────────────────────────────────────────┐                                         │
+│                         DATABRICKS — SILVER LAYER                           │                                         │
+│  • Deduplicación por ride_id                                                │                                         │
+│  • Enriquecimiento con tablas de mapeo (Data/*.json)                        │ <---------------------------------------│
+│  • Limpieza y validación de calidad                                         │
+│  • Delta Table: datos conformados                                           │
+└───────────────────────────────┬─────────────────────────────────────────────┘
+                                │
+                                │ read → agregaciones, joins
+                                ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         DATABRICKS — GOLD LAYER                             │
+│  • Star Schema: fact_rides + 6 dimensiones                                  │
+│  • Optimizado para consultas analíticas (Power BI, dashboards)              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+
+
+
+
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         FLUJO BATCH (ADF)                                    │
+│  GitHub (Data/*.json) → ADF Lookup (files_array.json) → ForEach → Copy     │
+│  → ADLS Gen2 (Bronze) → Databricks (Silver)                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
 
 
 ____________________________________________________________________________________________________________________________________________________________________________________________________________________________
@@ -63,40 +120,6 @@ La arquitectura integra servicios nativos de **Microsoft Azure** y tecnologías 
 | **Control de Versiones**              | **Git + GitHub**                                         | Gestión del código fuente y colaboración                | Permite versionar notebooks, scripts, pipelines y componentes del proyecto, favoreciendo reproducibilidad, trazabilidad y buenas prácticas de desarrollo.                   |
 
 ### Flujo tecnológico
-
-**FastAPI + Jinja2**
-
-↓
-
-**Azure Event Hubs**
-
-↓
-
-**Azure Databricks + Spark Structured Streaming**
-
-↓
-
-**PySpark + SQL**
-
-↓
-
-**Delta Lake / Azure Data Lake Storage Gen2**
-
-↓
-
-**Medallion Architecture — Bronze → Silver → Gold**
-
-↓
-
-**Unity Catalog — Governance & Lineage**
-
-↓
-
-**Star Schema — Fact + Dimensions**
-
-↓
-
-**Analytics / Business Intelligence**
 
 
 ![image](https://github.com/user-attachments/assets/23736d9b-7067-4eac-8c4d-781a5851991f)
