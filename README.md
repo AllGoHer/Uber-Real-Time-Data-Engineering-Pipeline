@@ -675,6 +675,8 @@ Ahora, en Azure veremos en el ubertopic otro evento.
 
 ![image](https://github.com/user-attachments/assets/7203a913-e6a2-40d1-b25d-798353c7d1d9)
 
+<br><br>
+____________________________________________________________________________________________________________________________________________________________________________________________________________________________
 **AZURE DATA FACTORY**
 
 ![image](https://github.com/user-attachments/assets/46ef86bd-7bed-4520-b1d7-24f276903c89)
@@ -682,19 +684,19 @@ Ahora, en Azure veremos en el ubertopic otro evento.
 Nos vamos al portal azure e ingresamos a gestión de recursos/grupos de recursos/RG-UberProject y hacemos click en crear.
 
 ![image](https://github.com/user-attachments/assets/9ada65bc-a079-443b-84bf-f158055777e0)
-<br><br>
+<br><br><br><br>
 
 ![image](https://github.com/user-attachments/assets/e7e09675-bef5-4486-b8a4-3e257957adf6)
-<br><br>
+<br><br><br><br>
 
 ![image](https://github.com/user-attachments/assets/7b47e487-9f84-49cd-93ae-29e47c77c954)
-<br><br>
+<br><br><br><br>
 
 ![image](https://github.com/user-attachments/assets/64a568be-ae33-4a37-88f3-d3cfb2c77617)
-<br><br>
+<br><br><br><br>
 
 ![image](https://github.com/user-attachments/assets/019655bb-0422-47ce-b240-bd8f1eb45aed)
-<br><br>
+<br><br><br><br>
 
 ![image](https://github.com/user-attachments/assets/78dd8e97-4209-4e76-9f0a-9310eaf30bb5)
 
