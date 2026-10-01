@@ -408,9 +408,15 @@ En este capitulo, veremos el desarrollo del proyecto Uber Real-Time paso a paso 
 
 ![image](https://github.com/user-attachments/assets/a7ed7744-4ea6-4401-a36d-da544bcde9e6)
 
+<br><br>
+
 ![image](https://github.com/user-attachments/assets/017cded8-6f74-4030-b971-5521eab18d98)
 
+<br><br>
+
 ![image](https://github.com/user-attachments/assets/bdea2436-aa15-4d17-979c-31acf5db9db9)
+
+<br><br>
 
 ![image](https://github.com/user-attachments/assets/f128dc96-9f83-4314-9225-a37f7f5f7b6f)
 
