@@ -123,7 +123,9 @@ La arquitectura integra servicios nativos de **Microsoft Azure** y tecnologías 
 
 ## 📂 Arquitectura Medallion (El Corazón del Pipeline)
 
-####🥉 Bronze Layer (Ingesta Cruda & Append-Only)
+____________________________________________________________________________________________________________________________________________________________________________________________________________________________
+### 🥉 Bronze Layer (Ingesta Cruda & Append-Only)
+__________________________________________________________________________________________________________________________________
 
 **Objetivo:** Ingesta de datos de forma más rápida posible sin transformaciones pesadas.
 
@@ -133,8 +135,10 @@ La arquitectura integra servicios nativos de **Microsoft Azure** y tecnologías 
 
 **Regla:** No se eliminan duplicados aquí. Es la fuente de verdad cruda.
 
+_____________________________________________________________________________________________________________________________________
 
-#### 🥈 Silver Layer (OBT - One Big Table, Limpieza, Deduplicación & Enrichment)
+### 🥈 Silver Layer (OBT - One Big Table, Limpieza, Deduplicación & Enrichment)
+_____________________________________________________________________________________________________________________________________
 
 **Objetivo:** Datos limpios, tipados y listos para análisis. Resolución de calidad de datos.
 
@@ -150,8 +154,9 @@ La arquitectura integra servicios nativos de **Microsoft Azure** y tecnologías 
   
 - Cálculos espaciales (Lat/Lon a Zonas de Uber).
 
-  
-#### 🥇 Gold Layer (Agregaciones de Negocio para BI)
+______________________________________________________________________________________________________________________________________  
+### 🥇 Gold Layer (Agregaciones de Negocio para BI)
+______________________________________________________________________________________________________________________________________
 
 **Objetivo:** Tablas de hechos y dimensiones altamente optimizadas para consumo de dashboards.
 
@@ -165,8 +170,9 @@ La arquitectura integra servicios nativos de **Microsoft Azure** y tecnologías 
 
 - Escritura final a Delta Tables gobernadas por Unity Catalog.
 
+____________________________________________________________________________________________________________________________________________________________________________________________________________________________
 ## Modelo de Datos (Star Schema)
-
+____________________________________________________________________________________________________________________________________________________________________________________________________________________________
 La capa Gold contiene 1 tabla de hechos + 6 tablas de dimensiones :
 
 | Tipo | Tabla | Descripción |
