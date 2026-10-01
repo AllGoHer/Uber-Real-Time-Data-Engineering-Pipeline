@@ -39,7 +39,7 @@ ________________________________________________________________________________
 
 ## 🏗️ Arquitectura de Alto Nivel
 
-![image](https://github.com/user-attachments/assets/8fe9eddc-a6dd-42f4-88b8-8b291e61d360)
+imagen:
 
                                         ┌─────────────────────────────────────────────────────────────────────────────┐
                                         │                         FLUJO DE DATOS END-TO-END                           │
