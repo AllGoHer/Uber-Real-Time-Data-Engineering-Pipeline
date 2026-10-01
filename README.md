@@ -41,62 +41,50 @@ ________________________________________________________________________________
 
 ![image](https://github.com/user-attachments/assets/8fe9eddc-a6dd-42f4-88b8-8b291e61d360)
 
-                                     ┌─────────────────────────────────────────────────────────────────────────────┐
-                                     │                         FLUJO DE DATOS END-TO-END                           │
-                                     └─────────────────────────────────────────────────────────────────────────────┘
+                                        ┌─────────────────────────────────────────────────────────────────────────────┐
+                                        │                         FLUJO DE DATOS END-TO-END                           │
+                                        └─────────────────────────────────────────────────────────────────────────────┘
 
-                            [Web App: api.py]
-                                  │
-                                  │ POST /book → generate_uber_ride_confirmation() [data.py]
-                                  ▼
-                   [connection.py: send_to_event_hub()]
-                                  │
-                                  │ JSON serializado → EventData
-                                  ▼
-                        ┌───────────────────┐
-                        │  Azure Event Hubs │  ← Topic: "ubertopic"
-                        │ (Kafka gestionado)│
-                        └─────────┬─────────┘
-                                  │
-                                  │ readStream (Spark Structured Streaming)
-                                  ▼
-┌─────────────────────────────────────────────────────────────────────────────┐         ┌─────────────────────────────────────────────────────────────────────────────┐
-|           DATABRICKS — BRONZE LAYER                                         |         │                         FLUJO BATCH (ADF)                                   │
-│  • Ingesta cruda, Append-Only, sin transformaciones                         │         │  GitHub (Data/*.json) → ADF Lookup (files_array.json) → ForEach → Copy      │
-│  • Delta Table: eventos JSON tal como llegan                                │         │  → ADLS Gen2 (Bronze) → Databricks (Silver)                                 │
-└─────────────────────────────────────────────────────────────────────────────┘         └───────────────────────────────┬─────────────────────────────────────────────┘
-                                │                                                                                       │
-                                │                                                                                       │
-                                │ readStream → transformaciones                                                         │
-                                ▼                                                                                       │
-┌─────────────────────────────────────────────────────────────────────────────┐                                         │
-│                         DATABRICKS — SILVER LAYER                           │                                         │
-│  • Deduplicación por ride_id                                                │                                         │
-│  • Enriquecimiento con tablas de mapeo (Data/*.json)                        │ <---------------------------------------│
-│  • Limpieza y validación de calidad                                         │
-│  • Delta Table: datos conformados                                           │
-└───────────────────────────────┬─────────────────────────────────────────────┘
-                                │
-                                │ read → agregaciones, joins
-                                ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         DATABRICKS — GOLD LAYER                             │
-│  • Star Schema: fact_rides + 6 dimensiones                                  │
-│  • Optimizado para consultas analíticas (Power BI, dashboards)              │
-└─────────────────────────────────────────────────────────────────────────────┘
+                                [Web App: api.py]
+                                      │
+                                      │ POST /book → generate_uber_ride_confirmation() [data.py]
+                                      ▼
+                       [connection.py: send_to_event_hub()]
+                                      │
+                                      │ JSON serializado → EventData
+                                      ▼
+                            ┌───────────────────┐
+                            │  Azure Event Hubs │  ← Topic: "ubertopic"
+                            │ (Kafka gestionado)│
+                            └─────────┬─────────┘
+                                      │
+                                      │ readStream (Spark Structured Streaming)
+                                      ▼
+    ┌─────────────────────────────────────────────────────────────────────────────┐         ┌─────────────────────────────────────────────────────────────────────────────┐
+    |           DATABRICKS — BRONZE LAYER                                         |         │                         FLUJO BATCH (ADF)                                   │
+    │  • Ingesta cruda, Append-Only, sin transformaciones                         │         │  GitHub (Data/*.json) → ADF Lookup (files_array.json) → ForEach → Copy      │
+    │  • Delta Table: eventos JSON tal como llegan                                │         │  → ADLS Gen2 (Bronze) → Databricks (Silver)                                 │
+    └─────────────────────────────────────────────────────────────────────────────┘         └───────────────────────────────┬─────────────────────────────────────────────┘
+                                    │                                                                                       │
+                                    │                                                                                       │
+                                    │ readStream → transformaciones                                                         │
+                                    ▼                                                                                       │
+    ┌─────────────────────────────────────────────────────────────────────────────┐                                         │
+    │                         DATABRICKS — SILVER LAYER                           │                                         │
+    │  • Deduplicación por ride_id                                                │                                         │
+    │  • Enriquecimiento con tablas de mapeo (Data/*.json)                        │ <---------------------------------------│
+    │  • Limpieza y validación de calidad                                         │
+    │  • Delta Table: datos conformados                                           │
+    └───────────────────────────────┬─────────────────────────────────────────────┘
+                                    │
+                                    │ read → agregaciones, joins
+                                    ▼
+    ┌─────────────────────────────────────────────────────────────────────────────┐
+    │                         DATABRICKS — GOLD LAYER                             │
+    │  • Star Schema: fact_rides + 6 dimensiones                                  │
+    │  • Optimizado para consultas analíticas (Power BI, dashboards)              │
+    └─────────────────────────────────────────────────────────────────────────────┘
 
-
-
-
-
-
-
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         FLUJO BATCH (ADF)                                    │
-│  GitHub (Data/*.json) → ADF Lookup (files_array.json) → ForEach → Copy     │
-│  → ADLS Gen2 (Bronze) → Databricks (Silver)                                 │
-└─────────────────────────────────────────────────────────────────────────────┘
 
 
 ____________________________________________________________________________________________________________________________________________________________________________________________________________________________
