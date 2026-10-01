@@ -37,7 +37,7 @@ El resultado es una arquitectura que demuestra cómo diseñar y construir un **p
 
 ____________________________________________________________________________________________________________________________________________________________________________________________________________________________
 
-## 🏗️ Arquitectura de Alto Nivel
+## 🏗️ Arquitectura de Flujo
 
 imagen:
 
