@@ -171,7 +171,7 @@ ________________________________________________________________________________
 - Escritura final a Delta Tables gobernadas por Unity Catalog.
 
 ____________________________________________________________________________________________________________________________________________________________________________________________________________________________
-## Modelo de Datos (Star Schema)
+## 📂 Modelo de Datos (Star Schema)
 ____________________________________________________________________________________________________________________________________________________________________________________________________________________________
 La capa Gold contiene 1 tabla de hechos + 6 tablas de dimensiones :
 
@@ -185,17 +185,58 @@ La capa Gold contiene 1 tabla de hechos + 6 tablas de dimensiones :
 | Dim | dim_vehicle | Información del vehículo |
 | Dim	| dim_location | Ubicación geográfica |
 
+____________________________________________________________________________________________________________________________________________________________________________________________________________________________
+## 🏗️ Estructura del Proyecto
+____________________________________________________________________________________________________________________________________________________________________________________________________________________________
 
-![image]()
+A continuación, la estructura completa del repositorio, mapeada a cada etapa del pipeline. Este desglose está pensado para el entendimiento de qué hace cada archivo, por qué existe y cómo se conecta con el flujo de datos de extremo a extremo.
 
-![image]()
+### 📁 Raíz del Proyecto
 
-![image]()
+![image](https://github.com/user-attachments/assets/9b5f41d5-0c37-469c-92fb-f5b3aaedc7dc)
 
-![image]()
 
-![image]()
+____________________________________________________________________________________________________________________________________________________________________________________________________________________________
+### 🔍 Detalle de Cada Componente
 
+#### 1. Data/ — Datos Históricos y Mapeos
+
+**Propósito:** Almacenar los archivos JSON que actúan como datos históricos para el pipeline batch (ingesta desde GitHub vía ADF) y como tablas de referencia para enriquecimiento en la capa Silver.
+
+![image](https://github.com/user-attachments/assets/e4c59064-6575-4f15-bc6b-f3c057fa2870)
+
+**Impacto en el pipeline:** Estos archivos alimentan la ingesta batch mediante Azure Data Factory, que los copia dinámicamente desde GitHub a ADLS Gen2 (capa Bronze). Posteriormente, en la capa Silver, se utilizan como tablas de dimensión para resolver claves foráneas y enriquecer los datos de viajes en tiempo real.
+
+#### 2. api.py — Punto de Entrada de la Web App
+
+**Propósito:** Simula el sistema de reservas de Uber mediante una aplicación FastAPI con dos endpoints.
+
+**Endpoints principales**
+
+**1. GET /** ---> Esto renderiza la página de inicio (home.html)
+
+codigo:
+
+        uvicorn api:app --reload 
+
+![image](https://github.com/user-attachments/assets/425b4cf1-0a21-4342-9e39-433eb511af57)
+
+
+![image](https://github.com/user-attachments/assets/a500ca5d-4168-4c5b-8e5d-7507c2d0df75)
+
+Aquí haremos una reserva de viaje haciendo click en Book a Ride
+
+
+**2. GET  /book**  ---> Genera un viaje aleatorio y lo envía a Event Hubs
+
+![image](https://github.com/user-attachments/assets/84c50db6-de68-4f45-ae81-4c9c95d2fb17)
+
+**Impacto en el pipeline:**
+
+- **/book** es el disparador de eventos en tiempo real. Cada vez que un usuario hace clic en "Book a Ride", se genera un objeto de viaje (ride confirmation) y se envía a Azure Event Hubs a través de connection.py.
+
+Este es el punto de entrada del streaming en vivo que alimenta la capa Bronze en Databricks.
+_________________________________________________________________________________________________________
 ![image]()
 
 ![image]()
