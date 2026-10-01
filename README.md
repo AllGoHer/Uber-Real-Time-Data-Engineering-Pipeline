@@ -784,14 +784,21 @@ Ahora, crearemos una conexión para el servicio con mis lagos de datos.
 <br><br><br><br>
 
 ![image](https://github.com/user-attachments/assets/de66ee48-f2b2-4b6d-929e-fed3ff9d5a88)
+<br><br><br><br>
 
-![image]()
+![image](https://github.com/user-attachments/assets/33be0751-7136-410a-aeb5-b53a9f020e6a)
 
-![image]()
+* Ahora, crearemos un conjunto de datos.
 
-![image]()
+Regresamos al Autor y entraremos a Datasets 
 
-![image]()
+
+![image](https://github.com/user-attachments/assets/2ae57a5d-155e-42f9-909a-e21dc441cdd7)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/c847d5a9-5b2a-44cd-8985-fdd48242381b)
+
+![image](https://github.com/user-attachments/assets/6ea6b8e2-540a-4fe2-a209-d63b842e11f7)
 
 ![image]()
 
