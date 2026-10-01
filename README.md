@@ -36,12 +36,13 @@ En la etapa final, los datos de negocio se modelan mediante un **Star Schema**, 
 El resultado es una arquitectura que demuestra cómo diseñar y construir un **pipeline moderno de Data Engineering orientado a tiempo real**, integrando ingesta de eventos, procesamiento distribuido, almacenamiento Delta, transformación incremental, gobierno de datos y modelado analítico dentro del ecosistema **Microsoft Azure + Databricks**.
 
 ____________________________________________________________________________________________________________________________________________________________________________________________________________________________
+
 ## 🏗️ Arquitectura de Alto Nivel
 
 ![image](https://github.com/user-attachments/assets/eb783301-c7e0-493a-9f55-1677494909f3)
 
 
-
+____________________________________________________________________________________________________________________________________________________________________________________________________________________________
 ## 🛠️ Stack Tecnológico Detallado
 
 La arquitectura integra servicios nativos de **Microsoft Azure** y tecnologías de **Apache Spark/Databricks** para construir un pipeline de datos **End-to-End, escalable, resiliente y orientado a procesamiento en tiempo real**, desde la generación de eventos hasta el consumo analítico.
@@ -104,6 +105,7 @@ La arquitectura integra servicios nativos de **Microsoft Azure** y tecnologías 
 **Stack principal:**
 `Azure Event Hubs` · `Azure Databricks` · `Apache Spark` · `PySpark` · `Spark Structured Streaming` · `Spark Declarative Pipelines` · `Delta Lake` · `ADLS Gen2` · `Azure Data Factory` · `Unity Catalog` · `SQL` · `FastAPI` · `Git/GitHub`
 
+____________________________________________________________________________________________________________________________________________________________________________________________________________________________
 
 ### Capacidades de Data Engineering demostradas
 
@@ -122,6 +124,7 @@ La arquitectura integra servicios nativos de **Microsoft Azure** y tecnologías 
 * **Cloud Data Engineering en Microsoft Azure**
 * **Version Control & Reproducible Data Pipelines**
 
+____________________________________________________________________________________________________________________________________________________________________________________________________________________________
 ## 📂 Arquitectura Medallion (El Corazón del Pipeline)
 
 ____________________________________________________________________________________________________________________________________________________________________________________________________________________________
@@ -191,16 +194,16 @@ ________________________________________________________________________________
 ____________________________________________________________________________________________________________________________________________________________________________________________________________________________
 
 A continuación, la estructura completa del repositorio, mapeada a cada etapa del pipeline. Este desglose está pensado para el entendimiento de qué hace cada archivo, por qué existe y cómo se conecta con el flujo de datos de extremo a extremo.
-
+________________________________________________________________________________________________________________________________________________________________________________________________________________________
 ### 📁 Raíz del Proyecto
 
-![image](https://github.com/user-attachments/assets/9b5f41d5-0c37-469c-92fb-f5b3aaedc7dc)
+![image](https://github.com/user-attachments/assets/4d2bb76b-5378-4664-a646-8e48ba568050)
 
 
 ____________________________________________________________________________________________________________________________________________________________________________________________________________________________
 ### 🔍 Detalle de Cada Componente
-
-#### 1. Data/ — Datos Históricos y Mapeos
+_________________________________________________________________________________________________________________________________________________________________________________
+#### 1. <mark>Data/</mark> — Datos Históricos y Mapeos
 
 **Propósito:** Almacenar los archivos JSON que actúan como datos históricos para el pipeline batch (ingesta desde GitHub vía ADF) y como tablas de referencia para enriquecimiento en la capa Silver.
 
@@ -208,7 +211,8 @@ ________________________________________________________________________________
 
 **Impacto en el pipeline:** Estos archivos alimentan la ingesta batch mediante Azure Data Factory, que los copia dinámicamente desde GitHub a ADLS Gen2 (capa Bronze). Posteriormente, en la capa Silver, se utilizan como tablas de dimensión para resolver claves foráneas y enriquecer los datos de viajes en tiempo real.
 
-#### 2. api.py — Punto de Entrada de la Web App
+____________________________________________________________________________________________________________________________________________________________________________
+#### 2. <mark>api.py</mark> — Punto de Entrada de la Web App
 
 **Propósito:** Simula el sistema de reservas de Uber mediante una aplicación FastAPI con dos endpoints.
 
@@ -237,9 +241,9 @@ Aquí haremos una reserva de viaje haciendo click en Book a Ride
 - **/book** es el disparador de eventos en tiempo real. Cada vez que un usuario hace clic en "Book a Ride", se genera un objeto de viaje (ride confirmation) y se envía a Azure Event Hubs a través de connection.py.
 
 Este es el punto de entrada del streaming en vivo que alimenta la capa Bronze en Databricks.
-____________________________________________________________________________________________________________________________
+__________________________________________________________________________________________________________________________________________________________________________
 
-#### 3. connection.py — Productor de Event Hubs
+#### 3. <mark>connection.py</mark> — Productor de Event Hubs
 
 **Propósito:** Gestionar la conexión y el envío de datos hacia Azure Event Hubs (Kafka gestionado).
 
@@ -256,13 +260,69 @@ Utiliza azure-eventhub SDK para publicar eventos en el topic configurado en .env
 
 Los datos enviados aquí son inmutables y se convierten en la fuente de verdad cruda para la capa Bronze en Databricks.
 
+_______________________________________________________________________________________________________________________________________________________________________
 #### 4. <mark>data.py</mark> — Generador de Datos Sintéticos
 
 **Propósito:** Generar objetos de viaje realistas que simulan las confirmaciones de reserva de Uber.
 
-Estructura del objeto generado (generate_uber_ride_confirmation()):
+Estructura del objeto generado (<mark>generate_uber_ride_confirmation()</mark>):
 
 ![image](https://github.com/user-attachments/assets/fe3b27d6-e591-436b-8ebe-efa5ec4b55dc)
+
+
+Impacto en el pipeline:
+
+Los IDs de claves foráneas (ej. vehicle_type_id, payment_method_id) coinciden con los mapeos en Data/, lo que permite joins eficientes en la capa Silver.
+
+El esquema generado está diseñado para modelado dimensional desde el origen, facilitando la construcción del Star Schema en la capa Gold.
+
+________________________________________________________________________________________________________________________________________________________________________________
+#### 5. <mark>files_array.json</mark> — Configuración de Ingesta Batch
+
+**Propósito:** Definir la lista de archivos que ADF debe descargar desde GitHub en el pipeline batch.
+
+json:
+
+      [
+        {"file": "map_cities"},
+        {"file": "map_cancellation_reasons"},
+        {"file": "bulk_rides"},
+        {"file": "map_payment_methods"},
+        {"file": "map_ride_statuses"},
+        {"file": "map_vehicle_makes"},
+        {"file": "map_vehicle_types"}
+      ]
+
+
+Impacto en el pipeline:
+
+- Este archivo se sube a ADLS Gen2 y se lee mediante una actividad Lookup en ADF.
+
+- El resultado se pasa a un ForEach que itera sobre cada archivo, ejecutando una actividad Copy que descarga dinámicamente @{item().file}.json desde GitHub .
+
+- Sin este archivo, la ingesta batch de datos históricos no se ejecuta.
+
+____________________________________________________________________________________________________________________________________________________________________________________________________________________________
+#### 6. <mark>pyproject.toml</mark> / <mark>requirements.txt</mark> / <mark>uv.lock</mark> — Gestión de Dependencias
+
+**Propósito:** Definir y bloquear las dependencias del proyecto para garantizar reproducibilidad en cualquier entorno.
+
+**Dependencias clave:**
+
+| Paquete | Rol en el proyecto |
+|---------|--------------------|
+| azure-eventhub | Cliente para enviar/recibir eventos desde Event Hubs |
+| faker | Generación de datos sintéticos realistas (nombres, direcciones, emails) |
+| fastapi / uvicorn | Framework web y servidor ASGI para la Web App |
+| jinja2 | Motor de plantillas para renderizar HTML |
+| python-dotenv | Carga de variables de entorno desde .env |
+
+**Impacto en el pipeline:**
+
+- <mark>uv.lock</mark> garantiza que todos los entornos (desarrollo, staging, producción) usen exactamente las mismas versiones, evitando el clásico "funciona en mi máquina" .
+
+- <mark>pyproject.toml</mark> usa el build backend <mark>uv_build</mark>, lo que indica modernidad en el toolchain y conocimiento de prácticas actuales de Python.
+
 
 ![image]()
 
