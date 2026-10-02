@@ -345,7 +345,7 @@ bash:
         pip install uv
         
         # Clonar el proyecto
-        git clone https://github.com/anshlambagit/Uber_Data_Engineer_Project.git
+        git clone https://github.com/AllGoHer/Uber-Real-Time-Data-Engineering-Pipeline.git
         cd Uber_Data_Engineer_Project
         
         # Instalar dependencias
