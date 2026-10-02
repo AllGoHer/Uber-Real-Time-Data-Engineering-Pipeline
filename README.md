@@ -2222,6 +2222,7 @@ Ahora, creamos en la carpeta de transformaciones el archivo silver_obt.sql
 Pasamos el siguiente código:
 
 Código:
+
 		CREATE OR REFRESH STREAMING TABLE silver_obt
 		AS 
 		
