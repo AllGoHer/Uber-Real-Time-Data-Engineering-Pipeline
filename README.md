@@ -926,125 +926,284 @@ Luego, vamos al portal de Azure y hacemos los siguientes pasos:
 <br><br><br><br>
 
 ![image](https://github.com/user-attachments/assets/b5e60b41-2c81-4c24-b515-2b3101588c5c)
+<br><br><br><br>
 
 ![image](https://github.com/user-attachments/assets/67ce2b28-ea20-4a90-a357-e0a30f726add)
 
 * Ahora, en el lienzo seleccionamos copiar datos y en generales desactivamos el estado de la actividad.
 
-![image]()
+![image](https://github.com/user-attachments/assets/d9c69db4-cb1a-401c-9c1e-e56f00af6a43)
 
-![image]()
 
-![image]()
+Y hacemos click en depurar
 
-![image]()
+![image](https://github.com/user-attachments/assets/99d1d05d-35f8-43f4-b335-4d111624df4b)
+<br><br><br><br>
 
-![image]()
+![image](https://github.com/user-attachments/assets/61c2904a-ff60-43f9-9fc5-9663aec85ebb)
 
-![image]()
+Ahora, verificamos el estado de salida.
 
-![image]()
+![image](https://github.com/user-attachments/assets/e37e859a-272d-40b6-afd8-6708c7d58cfc)
+<br><br><br><br>
 
-![image]()
+![image](https://github.com/user-attachments/assets/4e0d579f-e43b-47b3-8005-04638c27a887)
 
-![image]()
+Ahora, en el casillero de actividades buscamos ForEach y lo arrastramos al lienzo.
 
-![image]()
+![image](https://github.com/user-attachments/assets/e7a59a97-0194-4db6-a569-7e84689d7b2e)
 
-![image]()
+Luego, cambiamos de nombre de ForEach1 a ForEachFile
 
-![image]()
+![image](https://github.com/user-attachments/assets/aad7e7d2-b651-4375-8db5-8358b42f0140)
 
-![image]()
+Ahora enlazamos los nodos de búsqueda con ForEachFile.
 
-![image]()
+![image](https://github.com/user-attachments/assets/e5065cc6-b2f0-4ae9-9427-c4a61dc5342c)
 
-![image]()
+Luego, seleccionamos ForEach y, nos vamos a configuración y hacemos click en el recuadro de elementos para que se active el texto de agregar contenido dinámico, en el cual haremos click.
 
-![image]()
 
-![image]()
+![image](https://github.com/user-attachments/assets/089d2d80-b585-4e93-828e-c64c8f44100a)
+<br><br><br><br>
 
-![image]()
+![image](https://github.com/user-attachments/assets/1bd05851-7dd9-4a7a-bf27-75236afe46fe)
 
-![image]()
+Hacemos click en ds_files_array
 
-![image]()
+![image](https://github.com/user-attachments/assets/90974b77-6591-4a6f-b346-305ec0c47883)
 
-![image]()
+Y al final de la expresión agregamos .value
 
-![image]()
+![image](https://github.com/user-attachments/assets/0990ae4f-6cf3-4665-9496-111956d22c20)
 
-![image]()
+Ahora, seleccionamos copiar datos (HTTP_Ingestion) y lo cortamos para pegarlo dentro de ForEach. Luego, hacemos click en el lapiz (editar) de ForEach.
 
-![image]()
 
-![image]()
+![image](https://github.com/user-attachments/assets/89c463b8-b935-4c18-ae37-f7e75e13f0a3)
+<br><br><br><br>
 
-![image]()
+![image](https://github.com/user-attachments/assets/ef8c432a-d37a-490c-824b-289fa2f91af1)
 
-![image]()
+Y aquí dentro pegamos copiar datos.
 
-![image]()
+![image](https://github.com/user-attachments/assets/76fdd652-7f85-4723-a954-fcc025e60552)
 
-![image]()
+Después, hacemos click en activado.
 
-![image]()
+![image](https://github.com/user-attachments/assets/95941306-9f74-4c40-becc-c90359ce1a6b)
 
-![image]()
+Como queremos utilizar esta actividad varias veces, entonces nos iremos a origen y en conjunto de datos de origen seleccionamos ds_github
 
-![image]()
+![image](https://github.com/user-attachments/assets/ff125455-fd81-4379-89b5-26d4e02c7fb7)
+<br><br><br><br>
 
-![image]()
+![image](https://github.com/user-attachments/assets/003828cc-21f4-4d0f-a366-44c7694b1824)
 
-![image]()
+Ahora, pasamos el parámetro.
 
-![image]()
 
-![image]()
+Entonces, haremos click dentro del recuadro y se activará bajo del recuadro con letras azules “agregar contenido dinámico”, en el cual, haremos click.
 
-![image]()
+![image](https://github.com/user-attachments/assets/3f6b0ab9-a46f-4157-b48e-8c9517669db5)
 
-![image]()
+Luego, en la ventana emergente pasamos el siguiente código.
 
-![image]()
+Código:
 
-![image]()
+        @item().file
 
-![image]()
+![image](https://github.com/user-attachments/assets/3bcab709-a2d2-41db-b89a-c542ee3b89e3)
+<br><br><br><br>
 
-![image]()
+![image](https://github.com/user-attachments/assets/1b1e2caf-5a00-4c98-a669-f762f566f008)
 
-![image]()
+Ahora, nos vamos a Receptor y hacemos click en nuevo.
 
-![image]()
+![image](https://github.com/user-attachments/assets/e0d488d2-8945-459a-bce0-7e497767aa07)
 
-![image]()
+Seleccionamos Azure Data Lake Store Gen2.
 
-![image]()
+![image](https://github.com/user-attachments/assets/1414c4b9-0af9-4949-a88f-339c1a862018)
 
-![image]()
+Luego json
 
-![image]()
+![image](https://github.com/user-attachments/assets/ee459bff-df84-488e-88c7-1c1ad8f5dbce)
+<br><br><br><br>
 
-![image]()
+![image](https://github.com/user-attachments/assets/60afb34d-aac1-4ccc-8e35-1cba1191c5bc)
 
-![image]()
+Luego hacemos click en abierto.
 
-![image]()
+![image](https://github.com/user-attachments/assets/475f1b42-08f3-4516-ada4-3ee9e5a52951)
+<br><br><br><br>
 
-![image]()
+![image](https://github.com/user-attachments/assets/5618ea68-3993-4410-a5cc-e98ce2d00b43)
 
-![image]()
+Luego, vamos a parámetros y hacemos click en nuevo.
 
-![image]()
+![image](https://github.com/user-attachments/assets/bda2504f-8d6a-4af3-9d24-86ca0e27904d)
 
-![image]()
+![image](https://github.com/user-attachments/assets/87f3b4f0-524f-40a2-b938-48b9df70cbf5)
 
-![image]()
+Hacemos click en el recuadro “nombre de archivo” y luego click en el texto agregar contenido dinamico.
 
-![image]()
+![image](https://github.com/user-attachments/assets/78edd8df-39a9-4d44-85d4-b74f3b71e48f)
 
-![image]()
+Luego, generamos la expresión de canalización.
 
-![image]()
+Código:
+
+        @dataset().p_file
+
+![image](https://github.com/user-attachments/assets/7009fced-80a4-4ea5-9c57-78770cb92482)
+
+Ahora, agregamos las llaves y punto json.
+
+![image](https://github.com/user-attachments/assets/57bd1f70-fe1d-4971-8e42-c4f636f07e28)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/4b428ff4-5f7a-4595-891c-8cc8e0ea1adf)
+
+Ahora, regresamos a HTTPToADLS y en Receptor, hacemos click en el recuadro de valor y luego click en agregar contenido dinámico.
+
+![image](https://github.com/user-attachments/assets/0fb35d43-bb2e-4a7d-8550-673c126ab324)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/ccdcfe10-d056-47d7-b34d-5e2ac7d9ea39)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/684424ba-d61c-49e0-98b6-eb67442a7a61)
+
+Ahora, regresamos a HTTPToADLS
+
+![image](https://github.com/user-attachments/assets/44bbbe0b-e489-43d9-b810-05fb9f482454)
+
+Luego, hacemos click en publicar
+
+![image](https://github.com/user-attachments/assets/8c9c7205-c4df-4a30-9eef-0275449dc77a)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/ca2a2af6-25a1-437f-acca-ad927e8fee7b)
+
+Ahora, volvemos a hacer click en depurar.
+
+![image](https://github.com/user-attachments/assets/9e479db5-f66b-42f4-a224-0b9dda3fffdd)
+
+Luego en aceptar.
+
+![image](https://github.com/user-attachments/assets/72c2841d-0fb5-44e5-b0d3-8b474745a5e4)
+
+Ahora podremos ver si hay errores.
+
+![image](https://github.com/user-attachments/assets/082383f0-e8c1-4519-9b88-7c2628751536)
+
+Veremos cual es problema del error.
+
+![image](https://github.com/user-attachments/assets/38786f55-9848-44bd-b07c-68cfbb3c2ffd)
+
+Entonces vemos que error es de conexión con HTTP.
+
+Hacemos click en HTTP_Ingestion del ForEach y vamos al Receptor 
+
+![image](https://github.com/user-attachments/assets/3f324fc6-bec5-4ba4-affc-60625d743123)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/3f9b1d3a-b6ae-4227-801c-a70348df41be)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/33ae70a2-1507-476d-83b0-4dd46a9b1a4c)
+
+En la expresión agregamos las llaves y el punto json como el anterior.
+
+![image](https://github.com/user-attachments/assets/d412bac4-ece4-4997-b173-837f2f0206cf)
+
+Luego, publicamos y depuramos nuevamente.
+
+![image](https://github.com/user-attachments/assets/d4951a45-a07b-4dbb-95eb-dfe48d3b0bc0)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/9acc1c16-788d-4bf4-939e-07657bb8204f)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/6a8c6b91-0228-49be-b888-2e0ff8a0a882)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/ca106c3e-2a75-492a-b1d6-06988ceb6a84)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/5cb25ce0-8d36-4ef6-aa07-5aa4ef1ef302)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/afe57b79-7837-4cea-9920-6f83d3c86b58)
+
+Sale nuevamente error porque activamos el proceso antes de guardarlo. Entonces haremos click en HTTP_Ingestion y luego en Origen.
+
+
+![image](https://github.com/user-attachments/assets/832fd499-150f-4ad9-93d6-9350ff1d24f0)
+
+Y agregaremos las llaves y punto json.
+
+![image](https://github.com/user-attachments/assets/1ebf787a-e13f-4e46-8834-8cb1b42e8cac)
+
+Publicamos nuevamente.
+
+![image](https://github.com/user-attachments/assets/923c3568-3d7b-4a20-affd-8a8744633eff)
+
+Y depuramos.
+
+![image](https://github.com/user-attachments/assets/d5ffca3e-d176-47c3-bc96-4391a8007fa7)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/49e461ad-c099-4f31-be26-d622e1081d97)
+
+Para verificar que todo salió bien, vamos al portal Azure en contenedores / raw y debemos ver que se ha generado la carpeta ingestión.
+
+![image](https://github.com/user-attachments/assets/a74e1f14-5103-4747-98e6-8e37bdb11ef9)
+
+Hacemos click en ingestión.
+
+![image](https://github.com/user-attachments/assets/27497ce9-c6a7-4c81-b032-da07da887abd)
+
+* ahora, nos vamos a Databrick y crearemos un espacio de trabajo
+
+![image](https://github.com/user-attachments/assets/9f9def6b-3533-4236-83df-a0aadc281586)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/08c7895c-71f4-4a8c-8bad-5dd43c0e3852)
+
+Luego dentro de Uber_Project creamos un ETL Pipeline.
+
+![image](https://github.com/user-attachments/assets/83ca67a3-5192-4cc7-a7d9-dbb062a1ecae)
+
+Ahora, cambiaremos el nombre del pipeline, haciendo click en la pestaña y ponemos el nombre de uber_rides_ingestion.
+
+![image](https://github.com/user-attachments/assets/11cea8ff-47dc-4a5c-a5be-1ade031b75ec)
+
+Luego crearemos un catálogo, para ello haremos un duplicado de la pestaña de Databricks 
+
+![image](https://github.com/user-attachments/assets/4f65dcdf-62a1-4d62-a9b7-e18b60dd3d0b)
+
+![image](https://github.com/user-attachments/assets/feb795b0-a365-4803-a9a6-ec531d2d3917)
+
+![image](https://github.com/user-attachments/assets/c510ab82-230f-4bc1-a9b3-20d8c21ab43a)
+
+![image](https://github.com/user-attachments/assets/b9c0f671-de57-48b3-88bf-86cddc1795c1)
+
+Activamos All workspaces have access
+
+![image](https://github.com/user-attachments/assets/4542444a-3176-40a3-9fe5-56a00b64ddf2)
+
+Luego, damos click en siguiente.
+
+![image](https://github.com/user-attachments/assets/84e03d82-62b0-46a0-b36a-44de33dbd16c)
+
+Y luego en guardar.
+
+![image](https://github.com/user-attachments/assets/6f4b556e-b4c2-407b-b121-a3b86d9239b7)
+
+![image](https://github.com/user-attachments/assets/49bb408e-6829-4de3-8d5a-d8d9e62e60f9)
+
+Crearemos ahora un esquema llamado bronce
+
+
