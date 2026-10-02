@@ -1540,122 +1540,759 @@ Hacemos control + click en el http y, luego hacemos click en book a ride
 <br><br><br><br>
 
 ![image](https://github.com/user-attachments/assets/38447a3a-4679-4fdb-8c12-a7e12e7d7baa)
+<br><br><br><br>
 
 Esto confirma que se generó un nuevo evento.
 
 ![image](https://github.com/user-attachments/assets/c06aca78-f47b-4cd3-892f-731d65d3b191)
+<br><br><br><br>
 
 Ahora ejecutamos nuevamente ingest.py
 
-![image]()
+![image](https://github.com/user-attachments/assets/4f056313-0f34-4ac0-bfab-32d5a4548dae)
+<br><br><br><br>
 
-![image]()
+![image](https://github.com/user-attachments/assets/a8af5d8e-d2e1-40a7-a930-07f13187a011)
+<br><br><br><br>
 
-![image]()
+![image](https://github.com/user-attachments/assets/a021e4b1-011f-4cc3-9c00-d89a8b11dd9f)
+<br><br><br><br>
 
-![image]()
+Ahora, verificaremos que todo vaya bien, vamos a bronze_adls y hacemos la siguiente consulta.
 
-![image]()
+Código:
 
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
+		SELECT * FROM uber.bronze.rides_raw
 
 
-![image]()
+El resulta tendría que ser solo 5 filas.
 
-![image]()
+![image](https://github.com/user-attachments/assets/9bb0825b-32a8-4ebc-b5fc-45a61d94ab2e)
+<br><br><br><br>
 
-![image]()
+___________________________________________________________________________________________________________________________
+## SILVER LAYER
+___________________________________________________________________________________________________________________________
 
-![image]()
+![image](https://github.com/user-attachments/assets/39483532-2b13-48ad-b3a1-e8deb1609f63)
 
-![image]()
+Primero, crearemos un archivo llamado silver.py
 
-![image]()
+Código:
 
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
+		from pyspark import pipelines as dp
+		from pyspark.sql.functions import *
+		from pyspark.sql.types import *
+		
+		# Empty Streaming Table
+		dp.create_streaming_table("stg_rides")
+		
+		# Bulk/Initial Load
+		@dp.append_flow(
+		  target = "stg_rides"
+		  ) 
+		def rides_bulk():
+		    df = spark.readStream.table("bulk_rides")
+		    return df 
+		
+		# Streaming Load
+		@dp.append_flow(
+		  target = "stg_rides"
+		  ) 
+		def rides_stream():
+		    df = spark.readStream.table("rides_raw")
+		    return df
 
 
-![image]()
+ejecutamos el código.
 
-![image]()
+![image](https://github.com/user-attachments/assets/09af05e0-7ee7-48db-addf-c85510427a73)
+<br><br><br><br>
 
-![image]()
+![image](https://github.com/user-attachments/assets/ea3681f0-6344-4190-8108-796f33869fed)
+<br><br><br><br>
 
-![image]()
+Ahora, crearemos notebook llamado silver_obt
 
-![image]()
+![image](https://github.com/user-attachments/assets/fcdaa7c6-76b2-4186-bc46-f55a668a68d9)
+<br><br><br><br>
 
-![image]()
 
-![image]()
+Código:
 
-![image]()
+		SELECT * FROM uber.bronze.stg_rides
 
-![image]()
+![image](https://github.com/user-attachments/assets/ff6eb57e-d314-42f7-889b-aa3a01bb6334)
+
+Bueno, ya probamos que está funcionando bien, pues ahora eliminaremos la tabla creada.
+
+Código:
+
+		DROP TABLE uber.bronze.stg_rides
+
+![image](https://github.com/user-attachments/assets/5aaf2c18-f300-469a-89d0-3c8046ee31a1)
+
+___________________________________________________________________________________________________________________________
+### STREAM RIDES TRANSFORMETION
+
+Código:
+
+		df = spark.read.table("uber.bronze.rides_raw")
+		display(df)
+
+![image](https://github.com/user-attachments/assets/af08c989-8360-4bc8-a047-b970cf2b0a4d)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/9b5b8ffd-a848-4c9f-926b-9a2886b568a8)
+
+
+Ahora, crearemos el esquema.
+
+Código:
+
+		df = spark.sql("SELECT * FROM uber.bronze.bulk_rides")
+		df.schema
+
+
+![image](https://github.com/user-attachments/assets/c10258cf-fc03-4f96-822c-41da6c245cd8)
+
+Luego, vamos hacer algunos cambios en el orden del notebook stream rides.
+
+
+Creamos una nueva celda en la parte superior 
+
+![image](https://github.com/user-attachments/assets/eab30a19-226f-4586-bc55-f51aa4aca658)
+
+Agregamos el siguiente código copiado de la estructura de la última celda
+
+![image](https://github.com/user-attachments/assets/79d539d4-479f-40bc-8eb7-24a02bdd25ad)
+
+
+Código:
+
+		rides_schema = StructType([StructField('ride_id', StringType(), True), StructField('confirmation_number', StringType(), True), StructField('passenger_id', StringType(), True), StructField('driver_id', StringType(), True), StructField('vehicle_id', StringType(), True), StructField('pickup_location_id', StringType(), True), StructField('dropoff_location_id', StringType(), True), StructField('vehicle_type_id', LongType(), True), StructField('vehicle_make_id', LongType(), True), StructField('payment_method_id', LongType(), True), StructField('ride_status_id', LongType(), True), StructField('pickup_city_id', LongType(), True), StructField('dropoff_city_id', LongType(), True), StructField('cancellation_reason_id', LongType(), True), StructField('passenger_name', StringType(), True), StructField('passenger_email', StringType(), True), StructField('passenger_phone', StringType(), True), StructField('driver_name', StringType(), True), StructField('driver_rating', DoubleType(), True), StructField('driver_phone', StringType(), True), StructField('driver_license', StringType(), True), StructField('vehicle_model', StringType(), True), StructField('vehicle_color', StringType(), True), StructField('license_plate', StringType(), True), StructField('pickup_address', StringType(), True), StructField('pickup_latitude', DoubleType(), True), StructField('pickup_longitude', DoubleType(), True), StructField('dropoff_address', StringType(), True), StructField('dropoff_latitude', DoubleType(), True), StructField('dropoff_longitude', DoubleType(), True), StructField('distance_miles', DoubleType(), True), StructField('duration_minutes', LongType(), True), StructField('booking_timestamp', StringType(), True), StructField('pickup_timestamp', StringType(), True), StructField('dropoff_timestamp', StringType(), True), StructField('base_fare', DoubleType(), True), StructField('distance_fare', DoubleType(), True), StructField('time_fare', DoubleType(), True), StructField('surge_multiplier', DoubleType(), True), StructField('subtotal', DoubleType(), True), StructField('tip_amount', DoubleType(), True), StructField('total_fare', DoubleType(), True), StructField('rating', DoubleType(), True)])
+
+
+![image](https://github.com/user-attachments/assets/0d986deb-58c6-47af-a530-cdc0d76e86fd)
+
+
+Luego, creamos otra celda más en la parte superior para importar las librerías 
+
+Código:
+
+		from pyspark.sql.types import *
+		from pyspark.sql.functions import *
+
+
+![image](https://github.com/user-attachments/assets/5841d8bd-c047-4ab0-ad4d-0ab4aed35cc0)
+
+En la siguiente celda
+
+Código:
+
+		df = spark.read.table("uber.bronze.rides_raw")
+		df_parsed = df.withColumn("parsed_rides", from_json(col("rides"), rides_schema))
+		display(df_parsed)
+
+luego, ejecutamos todo hasta la cuarta celda.
+
+
+![image](https://github.com/user-attachments/assets/f0e8ee1d-94ce-4710-96a2-fc59eb21108b)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/94602d6f-6197-4bb0-aeeb-25b572adad55)
+
+Ahora, en la misma celda del código anterior, agregamos lo siguiente código para selccionar los parsed_rides por id.
+
+![image](https://github.com/user-attachments/assets/62bc70dd-296f-4a8b-82e5-ee8f31f9b181)
+
+Ahora, para ver todos los elementos se hará poniendo un asterisco después del parsed_rides.
+
+Código:
+
+		df = spark.read.table("uber.bronze.rides_raw")
+		df_parsed = df.withColumn("parsed_rides", from_json(col("rides"), rides_schema)).select("parsed_rides.*")
+		display(df_parsed)
+
+
+![image](https://github.com/user-attachments/assets/6f26c739-6d29-43ff-a8af-394986918fab)
+
+
+Ahora, copiamos todo el código de df_parsed y nos vamos a silver.py 
+
+Código:
+
+		df_parsed = df.withColumn("parsed_rides", from_json(col("rides"), rides_schema)).select("parsed_rides.*")
+
+
+![image](https://github.com/user-attachments/assets/b18cfed9-ec08-4d12-8e31-0b02444ecb15)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/ca214a8f-caf8-4de7-8009-1e8ac0b274d7)
+
+
+Luego copiamos rides_schema de silver_obt y lo pegamos bajo la importación de las librerías en silver.py
+
+![image](https://github.com/user-attachments/assets/b1c80e4a-c835-4adb-9972-e7c38badf088)
+
+Agregamos al final del código return df_parsed.
+
+Y finalmente ejecutamos el pipeline.
+
+![image](https://github.com/user-attachments/assets/2b737770-c91e-4195-a9bf-ba91131d2c4f)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/916f6638-73cf-42d8-8540-4636176dc123)
+
+Ahora VSCode hacemos una nueva reserva (Book a Ride)
+
+![image](https://github.com/user-attachments/assets/123b019a-613f-42d0-bdae-6628da830927)
+
+Verificamos 
+
+![image](https://github.com/user-attachments/assets/068e8887-4363-4796-81d1-5e26fba4a339)
+
+Ejecutamos otra vez el pipeline silver.py.
+
+![image](https://github.com/user-attachments/assets/79073f0c-f2fe-409f-919f-980507939893)
+
+Volvemos ahora al notebook silver_obt y en una celda ejecutamos el siguiente código.
+
+Código:
+
+		SELECT * FROM uber.bronze.stg_rides
+
+![image](https://github.com/user-attachments/assets/cbeb1420-b91b-4123-95a5-e78c6ff80f29)
+
+____________________________________________________________________________________________________________________
+#### JINJA TEMPLATE FOR OBT
+
+Importamos jinja.
+
+Código:
+
+		pip install jinja2
+
+
+![image](https://github.com/user-attachments/assets/b4d625d1-35b8-4097-99e3-1f72ffddd0c9)
+
+
+sql:
+
+		SELECT
+		    stg_rides.*
+		FROM
+		    uber.bronze.stg_rides stg_rides
+		LEFT JOIN
+		    uber.bronze.map_vehicle_types map_vehicle_types
+		ON
+		    stg_rides.vehicle_type_id = map_vehicle_types.vehicle_type_id
+		    
+		LEFT JOIN
+		    uber.bronze.map_vehicle_makes map_vehicle_makes
+		ON
+		    stg_rides.vehicle_make_id = map_vehicle_makes.vehicle_make_id
+
+
+![image](https://github.com/user-attachments/assets/4f7f5999-8ca0-43d0-b2d2-f1fbb5e7b2c3)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/9b2b50f3-d431-412a-b279-ee4f89339c6f)
+
+
+Ahora, en una celda anterior al último ejecutado generamos la configuración jinja.
+
+Código:
+
+			jinja_config = [
+			    {
+			        "table" : "uber.bronze.stg_rides stg_rides",
+			        "select" : "stg_rides.*",
+			        "where" : ""
+			    },
+			    {
+			        "table" : "uber.bronze.map_vehicle_makes map_vehicle_makes",
+			        "select" : "map_vehicle_makes.vehicle_make",
+			        "where" : "",
+			        "on" : "stg_rides.vehicle_make_id = map_vehicle_makes.vehicle_make_id"
+			    },
+			    {
+			        "table" : "uber.bronze.map_vehicle_types map_vehicle_types",
+			        "select" : "map_vehicle_types.vehicle_type,map_vehicle_types.description,map_vehicle_types.base_rate,map_vehicle_types.per_mile,per_minute",
+			        "where" : "",
+			        "on" : "stg_rides.vehicle_type_id = map_vehicle_types.vehicle_type_id"
+			    }
+			]
+
+
+![image](https://github.com/user-attachments/assets/d76171e5-53cc-4d3d-b3ae-2b4f342b25e0)
+
+Y ejecutamos el jinja_config
+
+En la siguiente celda.
+
+Código:
+
+		from jinja2 import Template
+		
+		jinja_str = """
+		
+		    SELECT
+		        {% for config in jinja_config %}
+		            {{ config.select }}
+		                {% if not loop.last %}
+		                    ,
+		                {% endif %}
+		        {% endfor %}
+		    FROM
+		        {% for config in jinja_config %}
+		            {% if loop.first %}
+		                {{ config.table }}
+		            {% else %}
+		                LEFT JOIN {{ config.table }}
+		                    ON {{ config.on }}
+		            {% endif %}
+		        {% endfor %}
+		
+		  
+		        {% for config in jinja_config %}
+		            
+		            {% if loop.first %}
+		                {% if config.where != "" %}
+		                WHERE
+		                {% endif %}
+		            {% endif %}
+		
+		            {{ config.where }}
+		                {% if not loop.last %}
+		                    {% if config.where != "" %}
+		                    AND
+		                    {% endif %}
+		                {% endif %}
+		
+		        {% endfor %}
+		                   
+		"""
+		
+		template = Template(jinja_str)
+		rendered_template = template.render(jinja_config=jinja_config)
+		print(rendered_template)
+
+
+
+y ejecutamos.
+
+![image](https://github.com/user-attachments/assets/9eadcb60-b15b-4ff9-b7d0-98a59de2fdab)
+
+![image](https://github.com/user-attachments/assets/cdbd13a1-b47c-4ad4-a139-921c2ba69c3b)
+
+En la siguiente celda.
+
+Código:
+
+		spark.sql(rendered_template)
+
+![image](https://github.com/user-attachments/assets/a91bb865-a4b6-4ec8-8a33-ff6febf1694b)
+
+En la misma celda modificamos
+
+Código:
+
+		display(spark.sql(rendered_template))
+
+
+![image](https://github.com/user-attachments/assets/70a7309a-b11f-4d35-bae9-f4a042d9444c)
+
+
+Ahora, completamos todo el código de jinja_config
+
+Código:
+
+			jinja_config = [
+			    {
+			        "table" : "uber.bronze.stg_rides stg_rides",
+			        "select" : "stg_rides.*",
+			        "where" : ""
+			    },
+			    {
+			        "table" : "uber.bronze.map_vehicle_makes map_vehicle_makes",
+			        "select" : "map_vehicle_makes.vehicle_make",
+			        "where" : "",
+			        "on" : "stg_rides.vehicle_make_id = map_vehicle_makes.vehicle_make_id"
+			    },
+			    {
+			        "table" : "uber.bronze.map_vehicle_types map_vehicle_types",
+			        "select" : "map_vehicle_types.vehicle_type,map_vehicle_types.description,map_vehicle_types.base_rate,map_vehicle_types.per_mile,map_vehicle_types.per_minute",
+			        "where" : "",
+			        "on" : "stg_rides.vehicle_type_id = map_vehicle_types.vehicle_type_id"
+			    },
+			    {
+			        "table" : "uber.bronze.map_ride_statuses map_ride_statuses",
+			        "select" : "map_ride_statuses.ride_status",
+			        "where" : "",
+			        "on" : "stg_rides.ride_status_id = map_ride_statuses.ride_status_id"
+			    },
+			    {
+			        "table" : "uber.bronze.map_payment_methods map_payment_methods",
+			        "select" : "map_payment_methods.payment_method, map_payment_methods.is_card, map_payment_methods.requires_auth",
+			        "where" : "",
+			        "on" : "stg_rides.payment_method_id = map_payment_methods.payment_method_id"
+			    },
+			    {
+			        "table" : "uber.bronze.map_cities map_cities",
+			        "select" : "map_cities.city as pickup_city, map_cities.state, map_cities.region",
+			        "where" : "",
+			        "on" : "stg_rides.pickup_city_id = map_cities.city_id"
+			    },
+			    {
+			        "table" : "uber.bronze.map_cancellation_reasons map_cancellation_reasons",
+			        "select" : "map_cancellation_reasons.cancellation_reason",
+			        "where" : "",
+			        "on" : "stg_rides.cancellation_reason_id = map_cancellation_reasons.cancellation_reason_id" 
+			    }
+			]
+
+
+![image](https://github.com/user-attachments/assets/5704f60a-fc23-4181-af00-d9fc5d2b1235)
+
+![image](https://github.com/user-attachments/assets/34319c98-dc35-492b-8dc0-1b5c32725b22)
+
+Y ejecutamos.
+
+Luego, ejecutamos la siguiente celda de jinja_str
+
+
+Ahora, en la siguiente celda pasamos el siguiente código.
+
+Código:
+
+		template = Template(jinja_str)
+		rendered_template = template.render(jinja_config=jinja_config)
+		display(spark.sql(rendered_template))
+
+
+
+![image](https://github.com/user-attachments/assets/7fc04c93-31d4-47ab-8813-b92244736309)
+
+Ahora, modificaremos el archivo map_cities.json  agregando     "updated_at": "2026-09-29T01:39:31.169+00:00" 
+
+Código:
+			
+Ahora, modificaremos el archivo map_cities.json  agregando     "updated_at": "2026-09-29T01:39:31.169+00:00" 
+
+Código:
+		[
+		  {
+		    "city_id": 1,
+		    "city": "New York",
+		    "state": "NY",
+		    "region": "Northeast",
+		    "updated_at": "2026-09-29T01:39:31.169+00:00"
+		  },
+		  {
+		    "city_id": 2,
+		    "city": "Los Angelas",
+		    "state": "CA",
+		    "region": "West",
+		    "updated_at": "2026-09-29T01:39:31.169+00:00"
+		  },
+		  {
+		    "city_id": 3,
+		    "city": "Chicago",
+		    "state": "IL",
+		    "region": "Midwest",
+		    "updated_at": "2026-09-29T01:39:31.169+00:00"
+		  },
+		  {
+		    "city_id": 4,
+		    "city": "Houston",
+		    "state": "TX",
+		    "region": "South",
+		    "updated_at": "2026-09-29T01:39:31.169+00:00"
+		  },
+		  {
+		    "city_id": 5,
+		    "city": "Phoenix",
+		    "state": "AZ",
+		    "region": "Southwest",
+		    "updated_at": "2026-09-29T01:39:31.169+00:00"
+		  },
+		  {
+		    "city_id": 6,
+		    "city": "Philadelphia",
+		    "state": "PA",
+		    "region": "Northeast",
+		    "updated_at": "2026-09-29T01:39:31.169+00:00"
+		  },
+		  {
+		    "city_id": 7,
+		    "city": "San Antonio",
+		    "state": "TX",
+		    "region": "South",
+		    "updated_at": "2026-09-29T01:39:31.169+00:00"
+		  },
+		  {
+		    "city_id": 8,
+		    "city": "San Diego",
+		    "state": "CA",
+		    "region": "West",
+		    "updated_at": "2026-09-29T01:39:31.169+00:00"
+		  },
+		  {
+		    "city_id": 9,
+		    "city": "Dallas",
+		    "state": "TX",
+		    "region": "South",
+		    "updated_at": "2026-09-29T01:39:31.169+00:00"
+		  },
+		  {
+		    "city_id": 10,
+		    "city": "San Jose",
+		    "state": "CA",
+		    "region": "West",
+		    "updated_at": "2026-09-29T01:39:31.169+00:00"
+		  }
+		]
+
+
+![image](https://github.com/user-attachments/assets/4458015b-28eb-471d-bba5-e0aac10bb5af)
+
+Guardamos los cambios y haremos un commit en git. Para ello, hacemos los siguiente:
+
+Pasos para hacer un commit en VS Code
+
+1.	Abre el Panel de Git: Haz clic en el icono de Control de código fuente en la barra lateral izquierda (tiene forma de bifurcación con tres círculos) o presiona las teclas Ctrl + Mayús + G.
+
+2.	Prepara los cambios (Stage): Pasa el cursor sobre el nombre de tu archivo modificado (el que tiene la M) y haz clic en el botón con el icono de más (+). El archivo subirá a una sección llamada Cambios preparados.
+
+3.	Escribe un mensaje: En la caja de texto que dice Mensaje, escribe una descripción breve de lo que hiciste (por ejemplo: Ajustar diseño de la cabecera).
+
+4.	Confirma el Commit: Haz clic en el botón azul que dice Confirmar (o Commit).
+¡Listo! La M desaparecerá porque Git ya guardó esa versión de tu archivo.
+
+
+ahora nos dirigimos a ADF_ProyectoUber-dev y depuramos
+
+![image](https://github.com/user-attachments/assets/4115e143-9788-479d-8210-9a3a9d9b7f56)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/d1b04820-add2-40b1-9fd5-be6ffa8709ec)
+
+
+Ahora, regresamos al notebook bronce_adls y lo modificamos de la siguiente manera.
+
+En la parte superior creamos una nueva celda para importar pandas.
+
+Código:
+
+		import pandas as pd
+
+		df = pd.read_json("https://dlproyectouberdev.blob.core.windows.net/raw/ingestion/map_cities.json.json?sp=r&st=2026-09-27T00:40:49Z&se=2026-10-02T04:55:49Z&spr=https&sv=2026-02-06&sr=c&sig=8ugYaBCaq3s1YjwH1OUD6JeXZjUXgvrCEH12xiZVdzs%3D")
+		
+		df_spark = spark.createDataFrame(df)
+		
+		display(df_spark) 
+
+
+y ejecutamos.
+
+![image](https://github.com/user-attachments/assets/816412d3-65a9-4546-abe3-ff0f7d57f3d0)
+
+Ahora, en la siguiente celda, hacemos las siguientes ediciones.
+
+Código:
+
+		import pandas as pd
+		
+		files = [
+		{"file":"map_cities"},
+		{"file":"map_cancellation_reasons"},
+		{"file":"bulk_rides"},
+		{"file":"map_payment_methods"},
+		{"file":"map_ride_statuses"},
+		{"file":"map_vehicle_makes"},
+		{"file":"map_vehicle_types"}
+		]
+		
+		for file in files:
+		
+		    url = f"https://dlproyectouberdev.blob.core.windows.net/raw/ingestion/{file['file']}.json.json?sp=r&st=2026-09-27T00:40:49Z&se=2026-10-02T04:55:49Z&spr=https&sv=2026-02-06&sr=c&sig=8ugYaBCaq3s1YjwH1OUD6JeXZjUXgvrCEH12xiZVdzs%3D" 
+		
+		    df = pd.read_json(url)
+		    df_spark = spark.createDataFrame(df)
+		
+		    # Writing Data to the Bronze Layer
+		    df_spark.write.format("delta")\
+		        .mode("overwrite")\
+		        .option("overwriteSchema", "true")\
+		        .saveAsTable(f"uber.bronze.{file['file']}")
+
+
+Y luego, ejecutamos.
+
+En la siguiente celda seleccionaremos la tabla map_cities
+
+Código:
+
+		SELECT * FROM uber.bronze.map_cities
+
+
+![image](https://github.com/user-attachments/assets/7c40eae7-6775-4fca-8db2-913036990517)
+
+Luego en la siguiente celda pasamos el siguiente código.
+
+Código:
+
+		SELECT * FROM uber.bronze.rides_raw
+
+![image](https://github.com/user-attachments/assets/8d961f52-1513-4eb2-a750-25f07c727ec4)
+
+Ahora nos vamos al archivo silver.py y editamos el código, vamos a modificar StructField('booking_timestamp', StringType() a StructField('booking_timestamp', TimestampType()
+
+A continuación, el código ya modificado.
+
+Código:
+
+		from pyspark import pipelines as dp
+		from pyspark.sql.functions import *
+		from pyspark.sql.types import *
+		
+		rides_schema = StructType([StructField('ride_id', StringType(), True), StructField('confirmation_number', StringType(), True), StructField('passenger_id', StringType(), True), StructField('driver_id', StringType(), True), StructField('vehicle_id', StringType(), True), StructField('pickup_location_id', StringType(), True), StructField('dropoff_location_id', StringType(), True), StructField('vehicle_type_id', LongType(), True), StructField('vehicle_make_id', LongType(), True), StructField('payment_method_id', LongType(), True), StructField('ride_status_id', LongType(), True), StructField('pickup_city_id', LongType(), True), StructField('dropoff_city_id', LongType(), True), StructField('cancellation_reason_id', LongType(), True), StructField('passenger_name', StringType(), True), StructField('passenger_email', StringType(), True), StructField('passenger_phone', StringType(), True), StructField('driver_name', StringType(), True), StructField('driver_rating', DoubleType(), True), StructField('driver_phone', StringType(), True), StructField('driver_license', StringType(), True), StructField('vehicle_model', StringType(), True), StructField('vehicle_color', StringType(), True), StructField('license_plate', StringType(), True), StructField('pickup_address', StringType(), True), StructField('pickup_latitude', DoubleType(), True), StructField('pickup_longitude', DoubleType(), True), StructField('dropoff_address', StringType(), True), StructField('dropoff_latitude', DoubleType(), True), StructField('dropoff_longitude', DoubleType(), True), StructField('distance_miles', DoubleType(), True), StructField('duration_minutes', LongType(), True), StructField('booking_timestamp', TimestampType(), True), StructField('pickup_timestamp', StringType(), True), StructField('dropoff_timestamp', StringType(), True), StructField('base_fare', DoubleType(), True), StructField('distance_fare', DoubleType(), True), StructField('time_fare', DoubleType(), True), StructField('surge_multiplier', DoubleType(), True), StructField('subtotal', DoubleType(), True), StructField('tip_amount', DoubleType(), True), StructField('total_fare', DoubleType(), True), StructField('rating', DoubleType(), True)])
+		
+		# Empty Streaming Table
+		dp.create_streaming_table("stg_rides")
+		
+		# Bulk/Initial Load
+		@dp.append_flow(
+		  target = "stg_rides"
+		  ) 
+		def rides_bulk():
+		    df = spark.readStream.table("bulk_rides")
+		    df = df.withColumn("booking_timestamp", col("booking_timestamp").cast("timestamp")) 
+		    return df 
+		
+		# Streaming Load
+		@dp.append_flow(
+		  target = "stg_rides"
+		  ) 
+		def rides_stream():
+		    df = spark.readStream.table("rides_raw")
+		    df_parsed = df.withColumn("parsed_rides", from_json(col("rides"), rides_schema)).select("parsed_rides.*")
+		    return df_parsed
+		    
+		
+
+
+ahora, nos dirigimos al notebook silver_obt
+código:
+drop table uber.bronze.stg_rides
+
+![image](https://github.com/user-attachments/assets/277a7147-6d82-412f-a65c-c00efd8f81c2)
+
+Luego regresamos a silver.py y ejecutamos el pipeline
+
+![image](https://github.com/user-attachments/assets/daa2a21a-0ebc-4bf4-bcd6-4ddd9d46e157)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/0a5d4221-7527-40bb-a106-2b05f8a8b1e9)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/80dede4f-b25e-47cc-89f2-af0a114b3414)
+
+Ahora, regresamos a silver_obt y ejecutamos nuevamente
+
+Código:
+
+		SELECT * FROM uber.bronze.stg_rides
+
+![image](https://github.com/user-attachments/assets/6d422f8e-1120-4d4f-ab54-c3ffe319dfbb)
+
+En el archivo silver.py agregamos a las importaciones jinja2
+
+Código:
+
+		%pip install jinja2
+
+![image](https://github.com/user-attachments/assets/e5a8b489-bf1c-4a06-b7b1-ac2b10d2c0c5)
+
+Ahora, creamos en la carpeta de transformaciones el archivo silver_obt.sql
+
+![image](https://github.com/user-attachments/assets/f8684cf7-fe89-4ba4-a4be-d1613b018307)
+
+Pasamos el siguiente código:
+
+Código:
+		CREATE OR REFRESH STREAMING TABLE silver_obt
+		AS 
+		
+		
+		    SELECT 
+		        
+		            stg_rides.ride_id, stg_rides.confirmation_number, stg_rides.passenger_id, stg_rides.driver_id, stg_rides.vehicle_id, stg_rides.pickup_location_id, stg_rides.dropoff_location_id, stg_rides.vehicle_type_id, stg_rides.vehicle_make_id, stg_rides.payment_method_id, stg_rides.ride_status_id, stg_rides.pickup_city_id, stg_rides.dropoff_city_id, stg_rides.cancellation_reason_id, stg_rides.passenger_name, stg_rides.passenger_email, stg_rides.passenger_phone, stg_rides.driver_name, stg_rides.driver_rating, stg_rides.driver_phone, stg_rides.driver_license, stg_rides.vehicle_model, stg_rides.vehicle_color, stg_rides.license_plate, stg_rides.pickup_address, stg_rides.pickup_latitude, stg_rides.pickup_longitude, stg_rides.dropoff_address, stg_rides.dropoff_latitude, stg_rides.dropoff_longitude, stg_rides.distance_miles, stg_rides.duration_minutes, stg_rides.booking_timestamp, stg_rides.pickup_timestamp, stg_rides.dropoff_timestamp, stg_rides.base_fare, stg_rides.distance_fare, stg_rides.time_fare, stg_rides.surge_multiplier, stg_rides.subtotal, stg_rides.tip_amount, stg_rides.total_fare, stg_rides.rating 
+		                
+		                    ,
+		                
+		        
+		            map_vehicle_makes.vehicle_make 
+		                
+		                    ,
+		                
+		        
+		            map_vehicle_types.vehicle_type,map_vehicle_types.description,map_vehicle_types.base_rate,map_vehicle_types.per_mile,map_vehicle_types.per_minute 
+		                
+		                    ,
+		                
+		        
+		            map_ride_statuses.ride_status 
+		                
+		                    ,
+		                
+		        
+		            map_payment_methods.payment_method, map_payment_methods.is_card, map_payment_methods.requires_auth 
+		                
+		                    ,
+		                
+		        
+		            map_cities.city as pickup_city, map_cities.state, map_cities.region, map_cities.updated_at as city_updated_at 
+		                
+		                    ,
+		                
+		        
+		            map_cancellation_reasons.cancellation_reason 
+		                
+		        
+		    FROM 
+		        
+		            
+		                STREAM (uber.bronze.stg_rides) 
+		                WATERMARK booking_timestamp DELAY OF INTERVAL 3 MINUTES stg_rides
+		            
+		            
+		                LEFT JOIN uber.bronze.map_vehicle_makes map_vehicle_makes ON stg_rides.vehicle_make_id = map_vehicle_makes.vehicle_make_id
+		            
+		        
+		            
+		                LEFT JOIN uber.bronze.map_vehicle_types map_vehicle_types ON stg_rides.vehicle_type_id = map_vehicle_types.vehicle_type_id
+		            
+		        
+		            
+		                LEFT JOIN uber.bronze.map_ride_statuses map_ride_statuses ON stg_rides.ride_status_id = map_ride_statuses.ride_status_id
+		            
+		        
+		            
+		                LEFT JOIN uber.bronze.map_payment_methods map_payment_methods ON stg_rides.payment_method_id = map_payment_methods.payment_method_id
+		            
+		        
+		            
+		                LEFT JOIN uber.bronze.map_cities map_cities ON stg_rides.pickup_city_id = map_cities.city_id
+		            
+		        
+		            
+		                LEFT JOIN uber.bronze.map_cancellation_reasons map_cancellation_reasons ON stg_rides.cancellation_reason_id = map_cancellation_reasons.cancellation_reason_id
+            
+        
+Y ejecutamos el pipeline 2 veces.
+
 
 ![image]()
 
