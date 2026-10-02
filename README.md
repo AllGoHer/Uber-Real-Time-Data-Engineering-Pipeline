@@ -1183,10 +1183,13 @@ Ahora, cambiaremos el nombre del pipeline, haciendo click en la pestaña y ponem
 Luego crearemos un catálogo, para ello haremos un duplicado de la pestaña de Databricks 
 
 ![image](https://github.com/user-attachments/assets/4f65dcdf-62a1-4d62-a9b7-e18b60dd3d0b)
+<br><br><br><br>
 
 ![image](https://github.com/user-attachments/assets/feb795b0-a365-4803-a9a6-ec531d2d3917)
+<br><br><br><br>
 
 ![image](https://github.com/user-attachments/assets/c510ab82-230f-4bc1-a9b3-20d8c21ab43a)
+<br><br><br><br>
 
 ![image](https://github.com/user-attachments/assets/b9c0f671-de57-48b3-88bf-86cddc1795c1)
 
@@ -1201,9 +1204,707 @@ Luego, damos click en siguiente.
 Y luego en guardar.
 
 ![image](https://github.com/user-attachments/assets/6f4b556e-b4c2-407b-b121-a3b86d9239b7)
+<br><br><br><br>
 
 ![image](https://github.com/user-attachments/assets/49bb408e-6829-4de3-8d5a-d8d9e62e60f9)
 
 Crearemos ahora un esquema llamado bronce
+
+![image](https://github.com/user-attachments/assets/1722f09f-df94-4138-92c0-76cf855eafbe)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/6727bdf1-23af-48d8-87bc-16b63a456e4d)
+
+Ahora regresamos a la otra pestaña del pipeline y configuramos Default Location haciendo click en workspace de la siguiente manera. 
+
+![image](https://github.com/user-attachments/assets/4c4657d8-cbda-4e76-ad01-0309869b0c25)
+
+Y luego guardamos.
+
+![image](https://github.com/user-attachments/assets/3ca141ff-0c71-451d-9aae-5dec951a8c86)
+
+Ahora, renombranos el archivo como ingest.py
+
+![image](https://github.com/user-attachments/assets/984cc675-5879-46cf-839c-9679351739eb)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/2830a8a3-fb2d-4835-a230-43a14a0892bb)
+
+Importamos las librerías necesarias.
+
+Código:
+
+		from pyspark import pipelines as dp
+		from pyspark.sql.functions import *
+		from pyspark.sql.types import *
+
+
+
+![image](https://github.com/user-attachments/assets/fb74f8d8-04a0-41dc-b14c-8bd86388ce73)
+
+Ahora buscaremos la estructura de configuración de eventos
+
+![image](https://github.com/user-attachments/assets/02f103e9-5b2f-4cf2-8178-a7ca41fa903d)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/04cbe3c4-d771-4173-a797-77291b29d7d6)
+
+Código:
+
+		# Event Hubs configuration
+		EH_NAMESPACE                    = spark.conf.get("iot.ingestion.eh.namespace")
+		EH_NAME                         = spark.conf.get("iot.ingestion.eh.name")
+		
+		EH_CONN_SHARED_ACCESS_KEY_NAME  = spark.conf.get("iot.ingestion.eh.accessKeyName")
+		SECRET_SCOPE                    = spark.conf.get("io.ingestion.eh.secretsScopeName")
+		EH_CONN_SHARED_ACCESS_KEY_VALUE = dbutils.secrets.get(scope = SECRET_SCOPE, key = EH_CONN_SHARED_ACCESS_KEY_NAME)
+		
+		EH_CONN_STR                     = f"Endpoint=sb://{EH_NAMESPACE}.servicebus.windows.net/;SharedAccessKeyName={EH_CONN_SHARED_ACCESS_KEY_NAME};SharedAccessKey={EH_CONN_SHARED_ACCESS_KEY_VALUE}"
+		# Kafka Consumer configuration
+		
+		KAFKA_OPTIONS = {
+		  "kafka.bootstrap.servers"  : f"{EH_NAMESPACE}.servicebus.windows.net:9093",
+		  "subscribe"                : EH_NAME,
+		  "kafka.sasl.mechanism"     : "PLAIN",
+		  "kafka.security.protocol"  : "SASL_SSL",
+		  "kafka.sasl.jaas.config"   : f"kafkashaded.org.apache.kafka.common.security.plain.PlainLoginModule required username=\"$ConnectionString\" password=\"{EH_CONN_STR}\";",
+		  "kafka.request.timeout.ms" : spark.conf.get("iot.ingestion.kafka.requestTimeout"),
+		  "kafka.session.timeout.ms" : spark.conf.get("iot.ingestion.kafka.sessionTimeout"),
+		  "maxOffsetsPerTrigger"     : spark.conf.get("iot.ingestion.spark.maxOffsetsPerTrigger"),
+		  "failOnDataLoss"           : spark.conf.get("iot.ingestion.spark.failOnDataLoss"),
+		  "startingOffsets"          : spark.conf.get("iot.ingestion.spark.startingOffsets")
+		}
+
+Luego, editamos el código, quedando de la siguiente manera.
+
+Código:
+
+		from pyspark import pipelines as dp
+		from pyspark.sql.functions import *
+		from pyspark.sql.types import *
+		
+		# Event Hubs configuration
+		EH_NAMESPACE = "EventosUber"
+		EH_NAME = "ubertopic"
+		
+		EH_CONN_STR = spark.conf.get("connection_string")
+		# Kafka Consumer configuration
+		
+		KAFKA_OPTIONS = {
+		  "kafka.bootstrap.servers"  : f"{EH_NAMESPACE}.servicebus.windows.net:9093",
+		  "subscribe"                : EH_NAME,
+		  "kafka.sasl.mechanism"     : "PLAIN",
+		  "kafka.security.protocol"  : "SASL_SSL",
+		  "kafka.sasl.jaas.config"   : f"kafkashaded.org.apache.kafka.common.security.plain.PlainLoginModule required username=\"$ConnectionString\" password=\"{EH_CONN_STR}\";",
+		  "kafka.request.timeout.ms" : 10000,
+		  "kafka.session.timeout.ms" : 10000,
+		  "maxOffsetsPerTrigger"     : 10000,
+		  "failOnDataLoss"           : "true",
+		  "startingOffsets"          : "earliest"
+		}
+		
+		@dp.table
+		def rides_raw():
+		    df = spark.readStream.format("kafka")\
+		               .options(**KAFKA_OPTIONS)\
+		               .load()
+		
+		    # Converting Values To string
+		    df = df.withColumn("rides",col("value").cast("string"))
+		
+		    return df
+
+
+Nos vamos a configuración
+
+![image](https://github.com/user-attachments/assets/5b6ee0e0-a701-4e08-bb30-3412c3291e3e)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/be1a544f-6d7d-43cd-9d38-dc16b3c96695)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/7c5a4bff-6995-444d-a5c5-34faccbe1271)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/205bc7ae-6f1b-4c43-91ce-384fe914df30)
+
+Ahora, creamos un folder llamado exploraciones y dentro de ella una archivo llamado exploraciones simples, donde pasaremos el código que creamos de la ingestión para hacer algunas pruebas.
+
+![image](https://github.com/user-attachments/assets/fd787222-8ca7-4806-b97a-5c88357b88eb)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/92b1afd6-186e-45ae-89fb-1b94401c83c5)
+
+Luego pegamos el código a dentro.
+
+![image](https://github.com/user-attachments/assets/b44daa18-e9f4-4f48-a7b4-a1df7ad35a27)
+
+Ahora, vamos a duplicar la pestaña de Databricks y en catalogo bronce crearemos un volumen.
+
+![image](https://github.com/user-attachments/assets/84e6584d-de22-4bdd-a548-deac4fd77fb0)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/f80eb81e-3885-4bdd-88ff-c5a0929df90a)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/8dcf12b5-3f2b-4a2c-90a1-d269aee89121)
+
+Ahora creamos un directorio.
+
+![image](https://github.com/user-attachments/assets/a290ffcf-f1f1-4c9e-b9de-3444e9470926)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/c25f6a0c-315a-4895-9654-4b4abf09009b)
+
+volvemos a ingest.py y ejecutamos el código. 
+
+![image](https://github.com/user-attachments/assets/0e5f2c2c-fcf9-4cd0-8ae6-aca588d518f0)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/d64d858e-4db3-4718-bb33-7085c39150b9)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/87157bf8-5bfb-4239-bb09-8ec440821ea0) 
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/b3580d8b-0b4a-4204-a166-a3c5c944aafd)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/75fdaeab-edb5-4cf2-8adc-5d7036ca0dce)
+
+Se necesitará subir estos datos a Databricks
+
+![image](https://github.com/user-attachments/assets/5adece77-01b6-48f4-ae02-2bfe29466161)
+
+Ahora, accederemos a los datos de raw / ingestión a Databricks. Para ello, iremos a tokens de acceso compartido en Azure.
+
+![image](https://github.com/user-attachments/assets/d4e01edf-1b0e-4865-a2e9-0e8295c191b4)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/2dd63167-8089-4715-94a3-bf207f51188d)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/e4546bb6-2d59-485d-a61d-d836e491e4c5)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/40202a35-d629-46e3-81ea-8702b11722b6)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/4cfa1348-09d1-4e3c-861e-d626896a8df0)
+
+En este caso del proyecto, solo solicitaremos permiso de lectura.
+
+![image](https://github.com/user-attachments/assets/effbc989-a6ed-4d42-b5bf-703b9a175cdf)
+
+Agregamos la fecha y hora de vencimiento y, generar URL y Token de SAS
+
+![image](https://github.com/user-attachments/assets/0c72634c-73e5-4c15-83a5-1900fbfd5c42)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/e3eeef19-123e-4eaa-b3b7-300db3c54780)
+
+También crearemos un token para subir de nivel el contenedor raw, haciendo el mismo procedimiento anterior y copiando el token SAS
+
+<mark>NOTA:</mark> todos tus token y URL pégalos en un block de notas para no olvidarlos.
+
+Ahora, vamos a Databricks a workspace del proyecto y, creamos un cuaderno llamado bronze_adls
+
+![image](https://github.com/user-attachments/assets/1b576cc2-6503-4e26-bf2e-7f9c6709020c)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/e545f977-ccef-48ff-968c-6319f1e2c074)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/83195bfe-3942-4e84-b4b5-b64a4dde83ec)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/28de2c83-db33-44cc-8e2d-9ea85c3fc183)
+
+importamos la librería pandas y la URL del proyecto más el archivo de ingestión/map_cities.json?.
+
+<mark>Nota:</mark> el signo de interrogación “?” se usa para hacer un llamado a la API o solicitud de consulta.
+
+
+Código:
+
+		Import pandas as pd
+		url = “https://dlproyectouberdev.blob.core.windows.net/raw/ingestion/map_cities.json.json?”
+
+![image](https://github.com/user-attachments/assets/3f30fe08-13f3-46f0-9de3-fcfb6fc33eb4)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/bd2d2f4c-3064-4a08-af27-132847c99e10)
+
+Luego agregamos al final de url el token de acceso de caducidad
+
+![image](https://github.com/user-attachments/assets/77d0f394-c0a2-4a3f-bad2-f05a3ab282b5)
+
+
+Ahora el dataframe de lectura de la url
+
+Código:
+
+		df = pd.read_json(url)
+		df.head()
+
+
+el código final de la celda.
+
+Código:
+
+		import pandas as pd
+
+		url = "https://dlproyectouberdev.blob.core.windows.net/raw/ingestion/map_cities.json.json?sp=r&st=2026-09-27T00:40:49Z&se=2026-10-02T04:55:49Z&spr=https&sv=2026-02-06&sr=c&sig=8ugYaBCaq3s1YjwH1OUD6JeXZjUXgvrCEH12xiZVdzs%3D" 
+		
+		df = pd.read_json(url)
+		df.head()
+
+
+
+![image](https://github.com/user-attachments/assets/d9371127-5d0d-4968-8f51-213d97239d6a)
+
+Ahora, parametrizaremos el código para poder trabajar con los diferentes archivos que tenemos en raw/ingestion
+
+Código:
+
+		import pandas as pd
+		
+		files = [
+		{"file":"map_cities"},
+		{"file":"map_cancellation_reasons"},
+		{"file":"bulk_rides"},
+		{"file":"map_payment_methods"},
+		{"file":"map_ride_statuses"},
+		{"file":"map_vehicle_makes"},
+		{"file":"map_vehicle_types"}
+		]
+		
+		for file in files:
+		
+		    url = f"https://dlproyectouberdev.blob.core.windows.net/raw/ingestion/{file['file']}.json.json?sp=r&st=2026-09-27T00:40:49Z&se=2026-10-02T04:55:49Z&spr=https&sv=2026-02-06&sr=c&sig=8ugYaBCaq3s1YjwH1OUD6JeXZjUXgvrCEH12xiZVdzs%3D" 
+		
+		    df = pd.read_json(url)
+		    df_spark = spark.createDataFrame(df)
+		
+		    # Writing Data to the Bronze Layer
+		    df_spark.write.format("delta")\
+		        .mode("overwrite")\
+		        .saveAsTable(f"uber.bronze.{file['file']}")
+
+
+Y ejecutamos.
+
+
+![image](https://github.com/user-attachments/assets/71c21e69-1c58-4dd9-8964-617ff6f85e5f)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/f93d101a-d815-4c8e-94b7-584196ad0093)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/f8809cf8-a539-4c07-8071-e8d773abe14a)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/a6a42740-9acb-48de-9efa-8f4aa0ae35bc)
+
+Ahora probemos si todo va bien, para ello, haremos una consulta.
+
+Código:
+
+		SELECT * FROM uber.bronze.map_cities
+
+![image](https://github.com/user-attachments/assets/42d08fa5-b5b8-4e00-9209-47f0672add5d)
+
+Otra consulta.
+
+Código:
+
+		SELECT * FROM uber.bronze.bulk_rides
+
+![image](https://github.com/user-attachments/assets/e4f776ff-65d8-4fef-97fc-0295196638c9)
+
+Ahora, necesitamos unir la tabla bilk_rides con rides_raw de streaming para generar una tabla grande OBT en la capa de plata.
+
+![image](https://github.com/user-attachments/assets/03325909-538c-4df3-a203-6d86ab649f80)
+
+Ahora, nos vamos VSCode y ejecutamos el siguiente código.
+
+Código:
+
+		uvicorn api:app –reload
+
+![image](https://github.com/user-attachments/assets/f5cefa32-70c2-48a5-a7de-f230e75645a7)
+
+Hacemos control + click en el http y, luego hacemos click en book a ride
+
+![image](https://github.com/user-attachments/assets/3394775f-2074-4d18-8871-d55f03a14c04)
+<br><br><br><br>
+
+![image](https://github.com/user-attachments/assets/38447a3a-4679-4fdb-8c12-a7e12e7d7baa)
+
+Esto confirma que se generó un nuevo evento.
+
+![image](https://github.com/user-attachments/assets/c06aca78-f47b-4cd3-892f-731d65d3b191)
+
+Ahora ejecutamos nuevamente ingest.py
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
+![image]()
+
 
 
