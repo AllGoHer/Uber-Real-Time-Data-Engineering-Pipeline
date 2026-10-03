@@ -2295,254 +2295,429 @@ Código:
 Y ejecutamos el pipeline 2 veces.
 
 
-![image]()
+![image](https://github.com/user-attachments/assets/19f5166e-10a6-48db-b8bb-12733468095b)
+<br><br><br><br>
+
+
+![image](https://github.com/user-attachments/assets/434a888c-5826-4213-90ed-c70e6da9258a)
+
+Volvemos al notebook silver_obt
+
+Código:
+
+		SELECT * FROM uber.bronze.silver_obt
+
+
+![image](https://github.com/user-attachments/assets/94dc0dfb-ef26-4167-b3f6-29ab51dae5a8)
+
+Otra consulta.
+
+%sql:
+
+		SELECT 
+		    passenger_name,
+		    passenger_email,
+		    passenger_id,
+		    passenger_phone
+		FROM
+		    uber.bronze.silver_obt
+
+
+![image](https://github.com/user-attachments/assets/ea2a08f6-4a0b-4dc5-8b8a-23e6706c4214)
+
+En la carpeta de transformación creamos un archivo llamado model.py
+
+Código:
+
+		from pyspark import pipelines as dp
+		
+		
+		# Dim Passenger
+		@dp.view
+		def dim_passenger_view():
+		    df = spark.readStream.table("silver_obt")
+		    df = df.select("passenger_id", "passenger_name", "passenger_email", "passenger_phone")
+		    df = df.dropDuplicates(subset=['passenger_id'])
+		    return df
+		
+		dp.create_streaming_table("dim_passenger")
+		dp.create_auto_cdc_flow(
+		  target = "dim_passenger",
+		  source = "dim_passenger_view",
+		  keys = ["passenger_id"],
+		  sequence_by = "passenger_id",
+		  stored_as_scd_type = 1,
+		)
+
+Ejecutamos el pipeline.
+
+![image](https://github.com/user-attachments/assets/3da66e61-1ab6-4ff7-98f3-d322b066f05f)
+
+Ahora, hacemos la consulta para ver la dimensión de pasajeros.
+
+Código:
+
+		SELECT * FROM uber.bronze.dim_passenger
+
+![image](https://github.com/user-attachments/assets/3ebcd041-e63f-49e4-b1a6-50c5c3eae9d7)
+
+
+Esta vez nos toca hacer las dimensiones de conductor, vehículo, pago y reserva. Entonces agregamos el siguiente código al archivo model.py
+
+Código:
+
+		# Dim Driver
+		@dp.view
+		def dim_driver_view():
+		    df = spark.readStream.table("uber.bronze.silver_obt")
+		    df = df.select("driver_id","driver_name","driver_rating","driver_phone","driver_license")
+		    df = df.dropDuplicates(subset=['driver_id'])
+		    return df
+		
+		dp.create_streaming_table("dim_driver")
+		dp.create_auto_cdc_flow(
+		  target = "dim_driver",
+		  source = "dim_driver_view",
+		  keys = ["driver_id"],
+		  sequence_by = "driver_id",
+		  stored_as_scd_type = 1,
+		)
+		# Dim Vehicle
+		@dp.view
+		def dim_vehicle_view():
+		    df = spark.readStream.table("uber.bronze.silver_obt")
+		    df = df.select("vehicle_id","vehicle_make_id","vehicle_type_id","vehicle_model","vehicle_color","license_plate","vehicle_make","vehicle_type")
+		    df = df.dropDuplicates(subset=['vehicle_id'])
+		    return df
+		
+		dp.create_streaming_table("dim_vehicle")
+		dp.create_auto_cdc_flow(
+		  target = "dim_vehicle",
+		  source = "dim_vehicle_view",
+		  keys = ["vehicle_id"],
+		  sequence_by = "vehicle_id",
+		  stored_as_scd_type = 1,
+		)
+		# Dim Payment
+		@dp.view
+		def dim_payment_view():
+		    df = spark.readStream.table("uber.bronze.silver_obt")
+		    df = df.select("payment_method_id","payment_method","is_card","requires_auth")
+		    df = df.dropDuplicates(subset=['payment_method_id'])
+		    return df
+		
+		dp.create_streaming_table("dim_payment")
+		dp.create_auto_cdc_flow(
+		  target = "dim_payment",
+		  source = "dim_payment_view",
+		  keys = ["payment_method_id"],
+		  sequence_by = "payment_method_id",
+		  stored_as_scd_type = 1,
+		)
+		# Dim Booking
+		@dp.view
+		def dim_booking_view():
+		    df = spark.readStream.table("uber.bronze.silver_obt")
+		    df = df.select("ride_id","confirmation_number","dropoff_location_id","ride_status_id","dropoff_city_id","cancellation_reason_id","dropoff_address","dropoff_latitude","dropoff_longitude","booking_timestamp","dropoff_timestamp","pickup_address","pickup_latitude","pickup_longitude","pickup_location_id")
+		    df = df.dropDuplicates(subset=['ride_id'])
+		    return df
+		
+		dp.create_streaming_table("dim_booking")
+		dp.create_auto_cdc_flow(
+		  target = "dim_booking",
+		  source = "dim_booking_view",
+		  keys = ["ride_id"],
+		  sequence_by = "ride_id",
+		  stored_as_scd_type = 1,
+		)
+
+Luego ejecutamos el pipeline.
+
+![image](https://github.com/user-attachments/assets/b392eaf3-99bb-45a5-ae3c-c7f97ff5d709)
+
+Nos tocaría ahora agregar código para la dimensión de locación.
+
+Código:
+
+		# Dim Location
+		@dp.table
+		def dim_location_view():
+		    df = spark.readStream.table("uber.bronze.silver_obt")
+		    df = df.select("pickup_city_id","pickup_city","city_updated_at","region","state",)
+		    df = df.dropDuplicates(subset=['pickup_city_id','city_updated_at'])
+		    return df
+		
+		dp.create_streaming_table("dim_location")
+		dp.create_auto_cdc_flow(
+		  target = "dim_location",
+		  source = "dim_location_view",
+		  keys = ["pickup_city_id"],
+		  sequence_by = "city_updated_at",
+		  stored_as_scd_type = 2,
+		)
+
+Ejecutamos el código.
+
+![image](https://github.com/user-attachments/assets/6a20d6d3-e07a-42aa-9162-954f1496f23e)
+
+
+Luego realizamos una prueba del código para ver si todo marcha bien.
+
+Código:
+
+		SELECT * FROM uber.bronze.dim_booking
+
+
+Código:
+
+		SELECT * FROM uber.bronze.dim_location
+
+
+![image](https://github.com/user-attachments/assets/4a52fe97-8dc4-4d6c-abab-72eb1e31b7b7)
+
+![image](https://github.com/user-attachments/assets/bd27c518-e7af-4ab2-8785-32d04d60a6b1)
+
+
+Ahora, volveremos al archivo map_cities.json y lo modificaremos, para ver la función o flujo automático de los CDC 
+
+
+Código:
+
+		[
+		  {
+		    "city_id": 1,
+		    "city": "New New York",
+		    "state": "NY",
+		    "region": "Northeast",
+		    "updated_at": "2026-09-29T05:39:31.169+00:00"
+		  },
+		  {
+		    "city_id": 2,
+		    "city": "Nuevo Los Angelas",
+		    "state": "CA",
+		    "region": "West",
+		    "updated_at": "2026-09-29T05:39:31.169+00:00"
+		  },
+		  {
+		    "city_id": 3,
+		    "city": "New Chicago",
+		    "state": "IL",
+		    "region": "Midwest",
+		    "updated_at": "2026-09-29T05:39:31.169+00:00"
+		  },
+		  {
+		    "city_id": 4,
+		    "city": "Lo Houston",
+		    "state": "TX",
+		    "region": "South",
+		    "updated_at": "2026-09-29T05:39:31.169+00:00"
+		  },
+		  {
+		    "city_id": 5,
+		    "city": "New Phoenix",
+		    "state": "AZ",
+		    "region": "Southwest",
+		    "updated_at": "2026-09-29T05:39:31.169+00:00"
+		  },
+		  {
+		    "city_id": 6,
+		    "city": "New Philadelphia",
+		    "state": "PA",
+		    "region": "Northeast",
+		    "updated_at": "2026-09-29T05:39:31.169+00:00"
+		  },
+		  {
+		    "city_id": 7,
+		    "city": "San Antonio Raymondi",
+		    "state": "TX",
+		    "region": "South",
+		    "updated_at": "2026-09-29T05:39:31.169+00:00"
+		  },
+		  {
+		    "city_id": 8,
+		    "city": "Nuevo San Diego",
+		    "state": "CA",
+		    "region": "West",
+		    "updated_at": "2026-09-29T05:39:31.169+00:00"
+		  },
+		  {
+		    "city_id": 9,
+		    "city": "Dallas Tima",
+		    "state": "TX",
+		    "region": "South",
+		    "updated_at": "2026-09-29T05:39:31.169+00:00"
+		  },
+		  {
+		    "city_id": 10,
+		    "city": "Nuevo San Jose",
+		    "state": "CA",
+		    "region": "West",
+		    "updated_at": "2026-09-29T05:39:31.169+00:00"
+		  }
+		]
+
+
+Ahora haremos una reserva o Ride Booking, para ello vamos al VSCode y en la terminal escribimos lo siguiente.
+
+Código:
+
+		uvicorn api:app –reload
+
+![image](https://github.com/user-attachments/assets/f26dbcd7-3d10-427a-b37c-6b8c0f832a60)
+
+Luego, damos control + click en el http. Para hacer la reserva 3 veces.
+
 
-![image]()
+![image](https://github.com/user-attachments/assets/918cc542-550a-47d4-b217-60f91d0258fe)
+<br><br> <br><br>
 
-![image]()
+![image](https://github.com/user-attachments/assets/c49fea22-093e-49fd-b4b6-26df93427c89)
+
+Luego en ADF-ProyectoUber-dev depuramos.
 
-![image]()
+![image](https://github.com/user-attachments/assets/9198a24c-086a-4a7e-97b2-4b81e8f37966)
+<br><br> <br><br>
 
-![image]()
+![image](https://github.com/user-attachments/assets/11fa07ff-dde6-402b-9c35-6e939c615cce)
 
-![image]()
+Luego, nos vamos al notebook bronce_adls y ejecutamos la siguiente celda (ya hecha anteriormente).
 
-![image]()
+![image](https://github.com/user-attachments/assets/b1c3a406-e6c6-4d49-ab9d-8d85e55381ef)
 
-![image]()
+Ahora, volvemos a model.py y ejecutamos el pipeline.
 
-![image]()
+![image](https://github.com/user-attachments/assets/f5071a02-394f-40d2-aef9-46b5844f385e)
+<br><br> <br><br>
 
-![image]()
 
-![image]()
+![image](https://github.com/user-attachments/assets/f36a5442-da14-4b74-9875-37389979c1ae)
 
-![image]()
+Ahora, agregaremos al archivo model.py la tabla de hechos.
 
-![image]()
+Código:
 
-![image]()
+		# Fact Table
+		@dp.view
+		def fact_view():
+		    df = spark.readStream.table("uber.bronze.silver_obt")
+		    df = spark.readStream.table("uber.bronze.silver_obt")
+		    df = df.select("ride_id","pickup_city_id","payment_method_id","driver_id","passenger_id","vehicle_id","distance_miles","duration_minutes","base_fare","distance_fare","time_fare","surge_multiplier","total_fare","tip_amount","rating","base_rate","per_mile","per_minute")
+		    return df
 
-![image]()
+		dp.create_streaming_table("fact")
+		dp.create_auto_cdc_flow(
+		  target = "fact",
+		  source = "fact_view",
+		  keys = ["ride_id","pickup_city_id","payment_method_id","driver_id","passenger_id","vehicle_id"],
+		  sequence_by = "ride_id",
 
-![image]()
 
-![image]()
+ejecutamos el pipeline.
 
-![image]()
+![image](https://github.com/user-attachments/assets/46c380b1-1edc-47b4-a7a9-c4d6a3c31f3d)
 
-![image]()
+Comprobamos, para ello vamos a silver_obt
 
-![image]()
+Código:
 
-![image]()
+		SELECT * FROM uber.bronze.fact
 
-![image]()
+![image](https://github.com/user-attachments/assets/953b4269-1ea9-4f2a-aa76-ebc895785779)
 
-![image]()
+___________________________________________________________________________________________________________________________
+### GOLD LAYER
+___________________________________________________________________________________________________________________________
 
-![image]()
+**TESTING GOLD LAYER**
 
+Otra consulta.
 
-![image]()
+Código:
 
-![image]()
+		SELECT fact.ride_id, fact.base_fare, dim.region FROM uber.bronze.fact AS fact
+		LEFT JOIN uber.bronze.dim_location AS dim
+		ON 
+		    fact.pickup_city_id = dim.pickup_city_id 
 
-![image]()
 
-![image]()
+![image](https://github.com/user-attachments/assets/d9d9e23a-582f-4c23-b8b4-cb259ca4257b)
 
-![image]()
+Código:
 
-![image]()
+		SELECT fact.ride_id, fact.base_fare, dim.region FROM uber.bronze.fact AS fact
+		LEFT JOIN uber.bronze.dim_location AS dim
+		ON 
+		    fact.pickup_city_id = dim.pickup_city_id 
+		    AND dim.`__END_AT` IS NULL
 
-![image]()
+![image](https://github.com/user-attachments/assets/c8e53aa8-8785-481a-8af2-425de0a176b1)
+<br><br> <br><br>
 
-![image]()
+![image](https://github.com/user-attachments/assets/2f3427c6-9ed2-46e0-adbf-b84898aeb3be)
 
-![image]()
+Luego, si queremos crear un cronograma nos vamos a Schedule.
 
-![image]()
+![image](https://github.com/user-attachments/assets/9059690c-2619-4feb-9fa8-faadca13cfbf)
+<br><br> <br><br>
 
-![image]()
+![image](https://github.com/user-attachments/assets/d85e2303-6f5c-4efb-8ade-2a6f72380659)
 
-![image]()
+Ahora, para hacer un Jobs & Pipelines
 
-![image]()
+![image](https://github.com/user-attachments/assets/8daa474d-fa75-4a6e-8243-f5cdd151bf63)
+<br><br> <br><br>
 
-![image]()
+![image](https://github.com/user-attachments/assets/6e70e7cc-6658-4176-a216-7d40a7f78e2e)
+<br><br> <br><br>
 
-![image]()
+![image](https://github.com/user-attachments/assets/d22a8df0-dcb5-4b00-ba74-4511fc6f8a33)
+<br><br> <br><br>
 
-![image]()
+Le asignamos un nombre y luego el path
 
-![image]()
+![image](https://github.com/user-attachments/assets/8c16b9db-adf1-47d8-9e25-7a843f668969)
 
-![image]()
 
-![image]()
+![image](https://github.com/user-attachments/assets/ea6c5ded-a1a7-41b1-b4b3-6c238b63c14c)
+<br><br> <br><br>
 
-![image]()
+![image](https://github.com/user-attachments/assets/875bb8ac-18df-44c0-808e-ac1ab7800aeb)
+<br><br> <br><br>
 
-![image]()
+![image](https://github.com/user-attachments/assets/e63b305a-217d-4083-be3c-cc4d0df7e068)
 
-![image]()
+Luego, creamos la capa silver de la misma manera del paso anterior.
 
-![image]()
+![image](https://github.com/user-attachments/assets/21cc2c3b-34a1-4468-b8f5-eae71f99a63a)
+<br><br> <br><br>
 
-![image]()
+![image](https://github.com/user-attachments/assets/a989ae5c-c86b-4bf5-aff7-9e15f36ebe07)
 
-![image]()
+luego, hacemos click en crear tarea.
 
-![image]()
+Ahora, el siguiente proceso es un pipeline
 
-![image]()
+![image](https://github.com/user-attachments/assets/1cc44290-42a3-45de-a4c3-d967b103a7d3)
+<br><br> <br><br>
 
-![image]()
+![image](https://github.com/user-attachments/assets/f0a25904-e57a-422d-b95b-2898f6c77092)
+<br><br> <br><br>
 
-![image]()
+![image](https://github.com/user-attachments/assets/aa6999c2-346f-4be6-916a-a9d686d2cb63)
+<br><br> <br><br>
 
-![image]()
+![image](https://github.com/user-attachments/assets/aa4168f7-4d32-4fb0-82d7-fec284bb32a3)
+<br><br> <br><br>
 
-![image]()
+Y finalmente ejecutas.
 
-![image]()
+💥💥**FELICIDADES LO LOGRAMOS, HEMOS TERMINADO**💥💥
 
-![image]()
+GRACIAS POR SEGUIRME HASTA AQUÍ!!!
 
+Atentamente.
 
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
-
-![image]()
+![image](https://github.com/user-attachments/assets/480ab698-8d0a-4a40-be02-015dac5e9400)
 
 
 
